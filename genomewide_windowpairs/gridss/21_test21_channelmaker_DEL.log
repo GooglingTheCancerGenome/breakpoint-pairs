@@ -1,0 +1,14 @@
+2019-03-15 15:45:57,971 Loading data for Chr21
+2019-03-15 15:45:57,971 Loading data for channel clipped_reads
+2019-03-15 15:45:57,971 Reading clipped_reads for Chr21
+2019-03-15 15:46:01,813 End of reading
+2019-03-15 15:46:01,813 Loading data for channel clipped_read_distance
+2019-03-15 15:46:01,813 Reading clipped_read_distance for Chr21
+2019-03-15 15:46:13,223 End of reading
+2019-03-15 15:46:13,223 Loading data for channel coverage
+2019-03-15 15:46:13,223 Reading coverage for Chr21
+2019-03-15 15:46:17,591 End of reading
+2019-03-15 15:46:17,591 Loading data for channel split_read_distance
+2019-03-15 15:46:17,591 Reading split_read_distance for Chr21
+2019-03-15 15:46:17,627 End of reading
+2019-03-15 15:46:17,629 No SVs for ../MinorResearchInternship/VCF/gridss_fake.sym.vcf on Chromosome 21
