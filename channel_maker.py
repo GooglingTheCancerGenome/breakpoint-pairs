@@ -96,8 +96,8 @@ def load_channels(sample, chr_list):
             if HPC_MODE:
                 filename = os.path.join(prefix, sample, ch, '_'.join([chrom, ch + suffix]))
             else:
-                filename ="/home/cog/smehrem/MinorResearchInternship/NA12878/"+ch+"/"+'_'.join([chrom, ch + suffix])
-                #filename ="/home/cog/smehrem/breakpoint-pairs/21_"+ch+suffix
+                #filename ="/home/cog/smehrem/MinorResearchInternship/NA12878/"+ch+"/"+'_'.join([chrom, ch + suffix])
+                filename ="/home/cog/smehrem/MinorResearchInternship/NA12878/"+ch+"/"+chrom+"_"+ch+suffix
             assert os.path.isfile(filename)
 
             logging.info('Reading %s for Chr%s' % (ch, chrom))
@@ -155,14 +155,32 @@ def windowpairs_from_vcf(chrom, vcf_file_list, sv_type_list):
 
     return window_pairs
 
+def windowpairs_from_textfile(negFile):
+    '''
+    Function generates windpair coordinates based on textfile with chromosomal positions
+    :param negFile: Textfile with tab separated chromosomal positions.
+    :return:
+    '''
+    window_pairs = set()
+    assert os.path.isfile(negFile)
+    with open(negFile,'r') as infile:
+        for line in infile:
+            line = line.strip().split()
+            window_pairs.add(StructuralVariant(Breakpoint(line[0], line[1]),
+                                                   Breakpoint(line[0], line[2])))
+    return window_pairs
 
-def channel_maker(chrom, sampleName, vcf_file_list, sv_type_list, outFile):
+def channel_maker(chrom, sampleName, vcf_file_list, sv_type_list, outFile, negative, negFile):
 
     n_channels = 29
     bp_padding = 10
-
     channel_data = load_channels(sampleName, [chrom])
-    window_pairs = windowpairs_from_vcf(chrom,  vcf_file_list, sv_type_list)
+
+    if negative == "True":
+        window_pairs = windowpairs_from_textfile(negFile)
+    else:
+        window_pairs = windowpairs_from_vcf(chrom,  vcf_file_list, sv_type_list)
+
     if not window_pairs:
         logging.info("No SVs for "+vcf_file_list[0]+" on Chromosome "+chrom)
         sys.exit("No SVs for "+vcf_file_list[0]+" on Chromosome "+chrom+". Script stopped.")
@@ -175,6 +193,8 @@ def channel_maker(chrom, sampleName, vcf_file_list, sv_type_list, outFile):
 
     channel_windows = np.zeros(shape=(len(window_pairs),
                                       win_len * 2 + bp_padding, n_channels), dtype=np.uint32)
+    array_windids = np.array([])
+
 
     # dictionary of key choices
     direction_list = {'clipped_reads': ['left', 'right', 'D_left', 'D_right', 'I'],
@@ -194,6 +214,7 @@ def channel_maker(chrom, sampleName, vcf_file_list, sv_type_list, outFile):
     positions = []
     for sv in window_pairs:
         bp1, bp2 = sv.tuple
+        array_windids = np.append(array_windids, str(chrom)+"_"+str(bp1.pos)+"_"+str(bp2.pos))
         positions.extend(list(range(bp1.pos - win_hlen, bp1.pos + win_hlen)) +
                          list(range(bp2.pos - win_hlen, bp2.pos + win_hlen)))
     positions = np.array(positions)
@@ -291,6 +312,11 @@ def channel_maker(chrom, sampleName, vcf_file_list, sv_type_list, outFile):
     f.close()
     channel_log.close()
 
+    with gzip.GzipFile(outFile + "_winids.npy.gz", "w") as g:
+        np.save(file=g, arr=array_windids)
+    g.close()
+    channel_log.close()
+
 def inspect_windows(outFile):
 
     # Save the list of channel vstacks
@@ -331,6 +357,12 @@ def main():
                         help='File in which to write logs.')
     parser.add_argument('-vcf', '--vcflist',  help='comma delimited list of vcf paths', type=str)
     parser.add_argument('-svt', '--svtype', help='comma delimited list of svtypes to include in windows', type=str)
+    parser.add_argument('-neg', '--negativeset',
+                        help='Boolean: True or False. If True, windowpairs are generated with chromosomal positions. ',
+                        type=str)
+    parser.add_argument('-negf', '--negativesetfile',
+                        help='File if -neg is True.',
+                        type=str)
 
     args = parser.parse_args()
 
@@ -349,7 +381,9 @@ def main():
 
     t0 = time()
 
-    channel_maker(chrom=args.chr, sampleName=args.sample, vcf_file_list=vcf_files,  outFile=args.out, sv_type_list=sv_types)
+    channel_maker(chrom=args.chr, sampleName=args.sample, vcf_file_list=vcf_files,  outFile=args.out,
+                      sv_type_list=sv_types,
+                      negative=args.negativeset, negFile=args.negativesetfile)
 
     # inspect_windows(outFile=args.out)
 
