@@ -13,10 +13,16 @@ with open("/home/cog/smehrem/MinorResearchInternship/BAM/BAM_chr_list", "r") as 
         line = line.strip()
         chr_list += [line]
 
+sv_counter_dict={}
+
+for chrom in chr_list:
+    sv_counter_dict[chrom] = 0
+
 #out=open("Gridss_WeirdDels.vcf", "w")
 counter=0
+
 interval_dict={}
-sv_counter_dict={}
+
 for caller in callers:
     vcf_file="/home/cog/smehrem/MinorResearchInternship/VCF/"+caller+".sym.vcf"
     assert os.path.isfile(vcf_file)
@@ -25,14 +31,13 @@ for caller in callers:
         #out.write(str(vcf_in.header) + "\n")
     for chrom in chr_list:
         interval_dict[chrom]=IntervalTree()
-        sv_counter_dict[chrom]=0
         for rec in vcf_in.fetch():
             svrec = SVRecord_generic(rec, caller)
             startCI = abs(svrec.cipos[0]) + svrec.cipos[1]
             endCI = abs(svrec.ciend[0]) + svrec.ciend[1]
             if startCI <= 200 and endCI <= 200 and svrec.chrom == chrom and svrec.svtype == "DEL" and svrec.start != svrec.end:
                 try:
-                    interval_dict[chrom][svrec.start+svrec.cipos[0]:svrec.end+svrec.ciend[1]]=(svrec.start+svrec.cipos[0],svrec.end+svrec.ciend[1])
+                    interval_dict[chrom][svrec.start+svrec.cipos[0]:svrec.end+svrec.ciend[1]+1]=(svrec.start+svrec.cipos[0],svrec.end+svrec.ciend[1]+1)
                     sv_counter_dict[chrom]+=1
                 except ValueError:
                         print(rec)
@@ -46,13 +51,13 @@ with open("/home/cog/smehrem/MinorResearchInternship/VCF/gridss.sym.vcf") as ing
         line=line.strip()
         if "contig" in line:
             gen_pos=re.findall(r'ID=(\S*),|length=(\d*)',line)
-            genomepos_dict[gen_pos[0][0]]=int(gen_pos[1][1])
-startpos=1
+            genomepos_dict[gen_pos[0][0]] = int(gen_pos[1][1])
+
 genome_intervals={}
 
-for i in range(0, len(chr_list)):
-        genome_intervals[chr_list[i]] = IntervalTree()
-        genome_intervals[chr_list[i]][1:genomepos_dict[chr_list[i]]] = (startpos, genomepos_dict[chr_list[i]])
+for chrom in chr_list:
+        genome_intervals[chrom] = IntervalTree()
+        genome_intervals[chrom][1:genomepos_dict[chrom]+1] = (1, genomepos_dict[chrom]+1)
 
 
 
