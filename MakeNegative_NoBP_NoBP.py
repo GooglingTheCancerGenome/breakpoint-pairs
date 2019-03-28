@@ -7,6 +7,7 @@ import random
 
 callers=["delly", "manta", "lumpy", "gridss"]
 chr_list = []
+#with open("/home/cog/smehrem/MinorResearchInternship/BAM/BAM_chr_list", "r") as f:
 with open("/home/cog/smehrem/MinorResearchInternship/BAM/BAM_chr_list", "r") as f:
     for line in f:
         line = line.strip()
