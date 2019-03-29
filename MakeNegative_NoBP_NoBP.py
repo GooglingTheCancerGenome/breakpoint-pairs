@@ -37,7 +37,7 @@ for caller in callers:
             if startCI <= 200 and endCI <= 200 and svrec.chrom == chrom and svrec.svtype == "DEL" and svrec.start != svrec.end:
                 try:
                     interval_dict[chrom][svrec.start+svrec.cipos[0]:svrec.end+svrec.ciend[1]+1]=(svrec.start+svrec.cipos[0],svrec.end+svrec.ciend[1]+1)
-                    sv_counter_dict[chrom]+=1
+                    sv_counter_dict[chrom] += 1
                 except ValueError:
                         print(rec)
 
@@ -82,6 +82,8 @@ for key in sv_counter_dict:
         if not og_tree.overlaps(rand_strt.begin, rand_end.end):
             rand_windowpairs[key].add((a, b))
     print(key+" processed.")
+    print(len(rand_windowpairs[key]))
+    print(sv_counter_dict[key])
 
 with open("Negative_NoBP_NoBP.txt",'w') as out:
     for key in rand_windowpairs:
