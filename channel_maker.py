@@ -59,7 +59,7 @@ def create_dir(directory):
 
 def get_mappability_bigwig():
     mappability_file = "/hpc/cog_bioinf/ridder/users/lsantuari/Datasets/Mappability/GRCh37.151mer.bw" if HPC_MODE \
-        else "/home/cog/smehrem/MinorResearchInternship/BAM/Mappability/GRCh37.151mer.bw"
+        else "/hpc/cog_bioinf/ridder/users/lsantuari/Datasets/Mappability/GRCh37.151mer.bw"
     bw = pyBigWig.open(mappability_file)
 
     return bw
@@ -97,7 +97,7 @@ def load_channels(sample, chr_list):
                 filename = os.path.join(prefix, sample, ch, '_'.join([chrom, ch + suffix]))
             else:
                 #filename ="/home/cog/smehrem/MinorResearchInternship/NA12878/"+ch+"/"+'_'.join([chrom, ch + suffix])
-                filename ="/home/cog/smehrem/MinorResearchInternship/NA12878/"+ch+"/"+chrom+"_"+ch+suffix
+                filename ="/hpc/cog_bioinf/ridder/users/lsantuari/Git/DeepSV_runs/060219/CNN/scripts/NA12878/"+ch+"/"+chrom+"_"+ch+suffix
             assert os.path.isfile(filename)
 
             logging.info('Reading %s for Chr%s' % (ch, chrom))
@@ -143,7 +143,7 @@ def windowpairs_from_vcf(chrom, vcf_file_list, sv_type_list):
             svrec = SVRecord_generic(rec, caller[0])
             startCI = abs(svrec.cipos[0]) + svrec.cipos[1]
             endCI = abs(svrec.ciend[0]) + svrec.ciend[1]
-            if startCI > 200 or endCI > 200:
+            if startCI > 200 or endCI > 200 and svrec.start == svrec.end:
                 lostSV_logfile.write(str(rec) + "\n")
             elif svrec.chrom == chrom and svrec.svtype in sv_type_list:
                 window_pairs.add(StructuralVariant(Breakpoint(svrec.chrom, svrec.start),
@@ -155,7 +155,7 @@ def windowpairs_from_vcf(chrom, vcf_file_list, sv_type_list):
 
     return window_pairs
 
-def windowpairs_from_textfile(negFile):
+def windowpairs_from_textfile(negFile, chr):
     '''
     Function generates windpair coordinates based on textfile with chromosomal positions
     :param negFile: Textfile with tab separated chromosomal positions.
@@ -166,8 +166,9 @@ def windowpairs_from_textfile(negFile):
     with open(negFile,'r') as infile:
         for line in infile:
             line = line.strip().split()
-            window_pairs.add(StructuralVariant(Breakpoint(line[0], line[1]),
-                                                   Breakpoint(line[0], line[2])))
+            if line[0] == chr:
+                window_pairs.add(StructuralVariant(Breakpoint(line[0], int(line[1])),
+                                                   Breakpoint(line[0], int(line[2]))))
     return window_pairs
 
 def channel_maker(chrom, sampleName, vcf_file_list, sv_type_list, outFile, negative, negFile):
@@ -177,7 +178,7 @@ def channel_maker(chrom, sampleName, vcf_file_list, sv_type_list, outFile, negat
     channel_data = load_channels(sampleName, [chrom])
 
     if negative == "True":
-        window_pairs = windowpairs_from_textfile(negFile)
+        window_pairs = windowpairs_from_textfile(negFile, chrom)
     else:
         window_pairs = windowpairs_from_vcf(chrom,  vcf_file_list, sv_type_list)
 
