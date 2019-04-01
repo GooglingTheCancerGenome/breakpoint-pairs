@@ -143,7 +143,7 @@ def windowpairs_from_vcf(chrom, vcf_file_list, sv_type_list):
             svrec = SVRecord_generic(rec, caller[0])
             startCI = abs(svrec.cipos[0]) + svrec.cipos[1]
             endCI = abs(svrec.ciend[0]) + svrec.ciend[1]
-            if startCI > 200 or endCI > 200 and svrec.start == svrec.end:
+            if startCI > 200 or endCI > 200 or svrec.start == svrec.end:
                 lostSV_logfile.write(str(rec) + "\n")
             elif svrec.chrom == chrom and svrec.svtype in sv_type_list:
                 window_pairs.add(StructuralVariant(Breakpoint(svrec.chrom, svrec.start),
