@@ -38,7 +38,7 @@ import tensorflow as tf
 
 # Pandas import
 import pandas as pd
-
+import argparse
 #import altair as alt
 
 # Bokeh import
@@ -99,7 +99,7 @@ def data(datapath):
 
     return X, y, y_binary, win_ids
 
-def create_model(X, y_binary):
+def create_model(X, y_binary, lr):
 
     models = modelgen.generate_models(X.shape,
                                       y_binary.shape[1],
@@ -111,7 +111,7 @@ def create_model(X, y_binary):
                                       cnn_max_filters = 4,
                                       cnn_min_fc_nodes=6,
                                       cnn_max_fc_nodes=6,
-                                      low_lr=2, high_lr=2,
+                                      low_lr=lr, high_lr=lr,
                                       low_reg=1, high_reg=1,
                                       kernel_size=7)
 
@@ -139,19 +139,19 @@ def create_model(X, y_binary):
     return models
 
 
-def cross_validation(X, y, y_binary, channels, X_test, y_test, y_binary_test, output_dir_test, win_ids_test):
+def cross_validation(X, y, y_binary, channels, X_test, y_test, y_binary_test, output_dir_test, win_ids_test, split, epochs, lr):
 
     results = pd.DataFrame()
     X, y_binary = shuffle(X, y_binary, random_state=0)
     xtrain, xval, ytrain_binary, yval = train_test_split(X, y_binary,
-                                                         test_size=0.2, random_state=2)
+                                                         test_size=split, random_state=2)
     #print(xtrain.shape)
     #print(xval.shape)
     #print(ytrain_binary.shape)
     #print(yval.shape)
     #print(ytrain_binary)
     #print(yval)
-    for i in range(0, 10):
+    for i in range(0, 1):
         logging.info("Training model " + str(i + 1) + "/10...")
 
         output_iter_dir = output_dir_test+'/Training_Iteration_' + str(i + 1)
@@ -160,13 +160,13 @@ def cross_validation(X, y, y_binary, channels, X_test, y_test, y_binary_test, ou
 
         # Clear model, and create it
         model = None
-        model = create_model(X, y_binary)
+        model = create_model(X, y_binary, lr)
 
         # Debug message I guess
         logging.info ("Training new iteration on " + str(xtrain.shape[0]) + " training samples, " +
          str(xval.shape[0]) + " validation samples, this may take a while...")
 
-        history, model = train_model(model, xtrain, ytrain_binary, xval, yval)
+        history, model = train_model(model, xtrain, ytrain_binary, xval, yval, epochs)
 
         model.save(output_iter_dir+"/Best_Model_Iteration_"+str(i+1)+".h5")
         with open(output_iter_dir+'/Best_Model_History_Iteration_'+str(i+1), 'wb') as file_pi:
@@ -180,7 +180,7 @@ def cross_validation(X, y, y_binary, channels, X_test, y_test, y_binary_test, ou
         score_test = model.evaluate(X_test, y_binary_test, verbose=False)
         logging.info('Test loss and accuracy of best model: ' + str(score_test))
 
-        results, probs = evaluate_model(model, X_test, y_test, y_binary_test, results, i, channels, output_iter_dir,
+        results, probs = evaluate_model(model, X_test, y_test, y_binary_test, results, i, channels, output_iter_dir, epochs, hist=history.history,
                                  train_set_size=xtrain.shape[0],
                                  validation_set_size=xval.shape[0])
 
@@ -191,7 +191,7 @@ def cross_validation(X, y, y_binary, channels, X_test, y_test, y_binary_test, ou
     return results
 
 
-def train_model(model, xtrain, ytrain, xval, yval):
+def train_model(model, xtrain, ytrain, xval, yval, epochs):
 
     train_set_size = xtrain.shape[0]
     #print(xtrain.shape)
@@ -200,7 +200,7 @@ def train_model(model, xtrain, ytrain, xval, yval):
     #print(yval.shape)
     histories, val_accuracies, val_losses = find_architecture.train_models_on_samples(xtrain, ytrain,
                                                                                       xval, yval,
-                                                                                      model, nr_epochs=10,
+                                                                                      model, nr_epochs=epochs,
                                                                                       subset_size=train_set_size,
                                                                                       verbose=False)
 
@@ -208,7 +208,7 @@ def train_model(model, xtrain, ytrain, xval, yval):
     best_model, best_params, best_model_types = model[best_model_index]
     #logging.info(best_model_index, best_model_types, best_params)
 
-    nr_epochs = 10
+    nr_epochs = epochs
     history = best_model.fit(xtrain, ytrain,
                              epochs=nr_epochs, validation_data=(xval, yval),
                              verbose=False)
@@ -216,7 +216,7 @@ def train_model(model, xtrain, ytrain, xval, yval):
     return history, best_model
 
 
-def evaluate_model(model, X_test, y_test, ytest_binary, results, cv_iter, channels, output_dir,
+def evaluate_model(model, X_test, y_test, ytest_binary, results, cv_iter, channels, output_dir, epochs, hist,
                    train_set_size, validation_set_size):
 
     #Generate classes
@@ -278,7 +278,7 @@ def evaluate_model(model, X_test, y_test, ytest_binary, results, cv_iter, channe
         "validation_set_size": validation_set_size,
         "test_set_size": X_test.shape[0],
         "average_precision_score": average_precision["micro"],
-        "F1 Score":
+        #"F1 Score":
     }, ignore_index=True)
 
     plt.figure()
@@ -337,6 +337,33 @@ def evaluate_model(model, X_test, y_test, ytest_binary, results, cv_iter, channe
                 str(cv_iter) +'_'+channels+'.png', bbox_inches='tight')
     plt.close()
 
+    history = hist
+
+    acc = history["acc"]
+    loss = history["loss"]
+    val_acc = history["val_acc"]
+    val_loss = history["val_loss"]
+    x = range(1, len(acc)+1)
+    #print(x)
+    #print(acc)
+    fig, ax1 = plt.subplots()
+    ax1.set_xlabel('Epoch')
+    ax1.set_ylabel('Accuracy', color='r')
+    plt.plot(x, acc, color='red', label="Acc")
+    plt.plot(x, val_acc, color='lightcoral', label="Val_Acc")
+    ax1.tick_params(axis='y', color='r', labelcolor='r')
+    ax2 = ax1.twinx()
+    ax2.set_ylabel('Loss', color='blue')
+    plt.plot(x, loss, color='blue', label="Loss")
+    plt.plot(x, val_loss, color='lightblue', label="Val_Loss")
+    ax2.tick_params(axis='y', color='blue', labelcolor='blue')
+    h1, l1 = ax1.get_legend_handles_labels()
+    h2, l2 = ax2.get_legend_handles_labels()
+    plt.legend(h1 + h2, l1 + l2, bbox_to_anchor=(0.5, -0.1))
+    fig.tight_layout()
+    plt.savefig(output_dir+"/BestModelHistory_Plot.png", dpi=300, format='png')
+    plt.close()
+
     # for iter_class in mapclasses.values():
     #
     #     predicted = probs.argmax(axis=1)
@@ -371,7 +398,7 @@ def evaluate_model(model, X_test, y_test, ytest_binary, results, cv_iter, channe
     return results, probs
 
 
-def run_cv(output_dir_test):
+def run_cv(output_dir_test, split, epochs, lr):
 
     labels = get_channel_labels()
 
@@ -387,7 +414,7 @@ def run_cv(output_dir_test):
 
     X_test, y_test, y_binary_test, win_ids_test = data(datapath_test)
 
-    results = results.append(cross_validation(X, y, y_binary, channels, X_test, y_test, y_binary_test, output_dir_test, win_ids_test))
+    results = results.append(cross_validation(X, y, y_binary, channels, X_test, y_test, y_binary_test, output_dir_test, win_ids_test, split, epochs, lr))
 
     logging.info(results)
     results.to_csv(output_dir_test+"/CV_results.csv", sep='\t')
@@ -423,11 +450,22 @@ def plot_results(output_dir_test):
 
 
 def main():
+    parser = argparse.ArgumentParser(description='Training CNN on DELs')
+    parser.add_argument('-spl', '--split', type=float,
+                        default=0.4,
+                        help="Fraction of validation set")
+    parser.add_argument('-epo', '--epochs', type=int, default=10,
+                        help="Number of epochs to be trained on")
+    parser.add_argument('-lr', '--learningrate', type=int, default=2,
+                        help="Exponent for learning rate parameter in McFly")
 
-    output_dir_test = 'NA12878_CNN_results/delly'
+
+    args = parser.parse_args()
+
+    output_dir_test = 'NA12878_CNN_results_'+str(int(args.split*100))+'_'+str(args.epochs)+'_'+str(args.learningrate)+'_delly'
     if not os.path.isdir(output_dir_test):
-        os.mkdir('NA12878_CNN_results')
-        os.mkdir('NA12878_CNN_results/delly')
+        os.mkdir(output_dir_test)
+
 
     FORMAT = '%(asctime)s %(message)s'
     logging.basicConfig(
@@ -435,7 +473,7 @@ def main():
         filename=os.path.join(output_dir_test, 'logfile.log'),
         level=logging.INFO)
 
-    run_cv(output_dir_test)
+    run_cv(output_dir_test, split=args.split, epochs=args.epochs, lr=args.learningrate)
     plot_results(output_dir_test)
 
 
