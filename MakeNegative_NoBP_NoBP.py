@@ -83,8 +83,9 @@ for key in sv_counter_dict:
         if not og_tree.overlaps(rand_strt.begin, rand_end.end):
             rand_windowpairs[key].add((a, b))
     print(key+" processed.")
-    print(len(rand_windowpairs[key]))
-    print(sv_counter_dict[key])
+    #print(len(rand_windowpairs[key]))
+    #print(sv_counter_dict[key])
+
 
 with open("Negative_NoBP_NoBP.txt",'w') as out:
     for key in rand_windowpairs:
