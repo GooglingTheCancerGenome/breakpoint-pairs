@@ -8,6 +8,7 @@ import matplotlib
 matplotlib.use('Qt4Agg')
 import matplotlib.pyplot as plt
 plt.switch_backend('agg')
+import pickle
 
 import math
 
@@ -25,6 +26,7 @@ from mcfly import modelgen, find_architecture
 
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import precision_recall_curve
+from sklearn.utils import shuffle
 from sklearn.metrics import f1_score
 from sklearn.metrics import auc
 from sklearn.metrics import average_precision_score
@@ -46,11 +48,11 @@ import pandas as pd
 import logging
 
 
-HPC_MODE = True
-sample_name = 'OC'
-date = '070119'
-label_type = 'bpi'
-datapath_prefix = '/hpc/cog_bioinf/ridder/users/lsantuari' if HPC_MODE else '/Users/lsantuari/Documents'
+HPC_MODE = False
+#sample_name = 'OC'
+#date = '070119'
+#label_type = 'bpi'
+datapath_prefix = '/hpc/cog_bioinf/ridder/users/smehrem/breakpoint-pairs' if HPC_MODE else '/home/cog/smehrem/breakpoint-pairs/'
 
 if HPC_MODE:
     datapath_training =  datapath_prefix+'/Processed/Test/'+\
@@ -58,11 +60,8 @@ if HPC_MODE:
     datapath_test =  datapath_prefix+'/Processed/Test/'+\
                date+'/TestData/'
 else:
-    datapath_training = datapath_prefix + '/Processed/Test/' + \
-                        date + '/TestData_' + date + '/' + sample_name + '/TrainingData/'
-    datapath_test = datapath_prefix + '/Processed/Test/' + \
-                    date + '/TestData_' + date + '/' + sample_name + '/TestData/'
-
+    datapath_training = datapath_prefix + "N12878_DEL_TrainingData.npz"
+    datapath_test = datapath_prefix + "N12878_DEL_TestData.npz"
 
 def get_classes(labels):
     return sorted(list(set(labels)))
@@ -70,138 +69,23 @@ def get_classes(labels):
 
 def get_channel_labels():
     # Fill labels for legend
-
-    with open("Channel_Labels.txt", "r") as inlab:
-        labels = [line.strip() for line in inlab]
-
-
+    labels = []
+    with open("Channel_Labels.txt","r") as inlab:
+        for line in inlab:
+            line = line.strip()
+            labels += [line]
     return labels
-
-
-def get_channel_labels_TN():
-    # Fill labels for legend
-
-    labels = list()
-
-    for type in ['Tumor:', 'Normal:']:
-
-        labels.append(type+"coverage")
-        labels.append(type+"#left_clipped_reads")
-        labels.append(type+"#right_clipped_reads")
-        labels.append(type+"INV_before")
-        labels.append(type+"INV_after")
-        labels.append(type+"DUP_before")
-        labels.append(type+"DUP_after")
-        labels.append(type+"TRA_opposite")
-        labels.append(type+"TRA_same")
-
-        for direction in ['Forward', 'Reverse']:
-            for clipped in ['Left', 'Right', 'Not']:
-                for value in ['outliers']:
-                    labels.append(type + direction + '_' + clipped + '_Clipped_' + value)
-
-        labels.append(type + "#left split reads")
-        labels.append(type + "#right split reads")
-
-        for clipped in ['L', 'R']:
-            for value in ['sum', 'num', 'median']:
-                labels.append(type + clipped + '_SplitRead_' + value)
-
-    # labels.append("GC")
-    labels.append("Mappability")
-
-    for nuc in ['A', 'T', 'C', 'G', 'N']:
-        labels.append("One_hot_"+nuc+"_encoding")
-
-    for k, l in enumerate(labels):
-         logging.info(str(k) + ':' + l)
-
-    return labels
-
-
-def set_figure_size(plt):
-
-    # plt.tight_layout()
-
-    F = plt.gcf()
-    # Now check everything with the defaults:
-    DPI = F.get_dpi()
-    logging.info(
-        "DPI:", DPI)
-    DefaultSize = F.get_size_inches()
-    logging.info(
-        "Default size in Inches", DefaultSize)
-    logging.info(
-        "Which should result in a %i x %i Image" % (DPI * DefaultSize[0], DPI * DefaultSize[1]))
-
-    F.set_figwidth(DefaultSize[0] * 5)
-    F.set_figheight(DefaultSize[1] * 4)
-    Size = F.get_size_inches()
-    logging.info(
-        "Size in Inches", Size)
-
-
-def plot_channels(X, y, ids):
-
-    output_dir = 'OC/channel_plots'
-    if not os.path.isdir(output_dir):
-        os.mkdir(output_dir)
-
-    labels = get_channel_labels()
-    number_channels = len(labels)
-
-    classes = get_classes(y)
-
-    for c in classes:
-
-        output_dir_class = os.path.join(output_dir, c)
-        if not os.path.isdir(output_dir_class):
-            os.mkdir(output_dir_class)
-
-        c_idx = np.where(y == c)[0]
-        c_idx_random = np.random.choice(c_idx, size=10, replace=False)
-
-        for i in c_idx_random:
-
-            fig_name = y[i] + '_' + 'Chr' + ids[i].replace(':', '-')
-
-            logging.info(y[i], 'id:', 'Chr' + ids[i])
-            plt.title('Class: ' + y[i] + ' ' + 'Position: Chr' + ids[i], fontsize=30)
-            plt.ylim([0, number_channels])
-            plt.yticks(np.arange(number_channels), labels, fontsize=15)
-            plt.xticks(fontsize=30)
-
-            plt.vlines(x=0, ymin=0, ymax=number_channels, color='black')
-
-            for j in range(number_channels - 1, -1, -1):
-
-                if sum(X[i,:,j]) != 0:
-                    X_win = ((X[i,:,j] - min(X[i,:,j])) / max(X[i,:,j]))
-                else:
-                    X_win = X[i,:,j]
-
-                Z = [x + j for x in X_win]
-
-                plt.plot(np.arange(-100, 100), Z, label=y[j], linewidth=2)
-                plt.fill_between(np.arange(-100, 100), Z, j, alpha=.5, interpolate=True)
-
-            set_figure_size(plt)
-            plt.savefig(os.path.join(output_dir_class, fig_name + '.png'))
-            plt.clf()
-            plt.close()
-
 
 def data(datapath):
 
     dataset_type = '_balanced'
-    data_input_file = datapath + sample_name + '_' + label_type + dataset_type + '.npz.gz'
+    data_input_file = datapath
 
-    with gzip.GzipFile(data_input_file, "rb") as f:
-        npzfiles = np.load(f)
-        X = npzfiles['X']
-        y = npzfiles['y']
-        y_binary = npzfiles['y_binary']
-        win_ids = npzfiles['ids']
+    npzfiles = np.load(data_input_file)
+    X = npzfiles['X']
+    y = npzfiles['y']
+    y_binary = npzfiles['y_binary']
+    win_ids = npzfiles['ids']
 
     # logging.info(X.shape)
     # logging.info(y.shape)
@@ -214,7 +98,6 @@ def data(datapath):
     # idx = np.append(idx,[12,16,20,24,28,32])
 
     return X, y, y_binary, win_ids
-
 
 def create_model(X, y_binary):
 
@@ -230,7 +113,7 @@ def create_model(X, y_binary):
                                       cnn_max_fc_nodes=6,
                                       low_lr=2, high_lr=2,
                                       low_reg=1, high_reg=1,
-                                      kernel_size = 7)
+                                      kernel_size=7)
 
     # models = modelgen.generate_models(X.shape,
     #                                   y_binary.shape[1],
@@ -256,29 +139,24 @@ def create_model(X, y_binary):
     return models
 
 
-def cross_validation(X, y, y_binary, channels):
+def cross_validation(X, y, y_binary, channels, X_test, y_test, y_binary_test, output_dir_test, win_ids_test):
 
     results = pd.DataFrame()
+    X, y_binary = shuffle(X, y_binary, random_state=0)
+    xtrain, xval, ytrain_binary, yval = train_test_split(X, y_binary,
+                                                         test_size=0.2, random_state=2)
+    #print(xtrain.shape)
+    #print(xval.shape)
+    #print(ytrain_binary.shape)
+    #print(yval.shape)
+    #print(ytrain_binary)
+    #print(yval)
+    for i in range(0, 10):
+        logging.info("Training model " + str(i + 1) + "/10...")
 
-    # From https://medium.com/@literallywords/stratified-k-fold-with-keras-e57c487b1416
-    kfold_splits = 10
-
-    # Instantiate the cross validator
-    skf = StratifiedKFold(n_splits=kfold_splits, shuffle=True)
-
-    # Loop through the indices the split() method returns
-    for index, (train_indices, test_indices) in enumerate(skf.split(X, y)):
-
-        logging.info("Training on fold " + str(index + 1) + "/10...")
-
-        # Generate batches from indices
-        xtrain, xtest = X[train_indices], X[test_indices]
-        ytrain, ytest = y[train_indices], y[test_indices]
-        ytrain_binary, ytest_binary = y_binary[train_indices], y_binary[test_indices]
-
-        # split into train/validation sets
-        xtrain, xval, ytrain_binary, yval = train_test_split(xtrain, ytrain_binary,
-                                                             test_size=0.2, random_state=2)
+        output_iter_dir = output_dir_test+'/Training_Iteration_' + str(i + 1)
+        if not os.path.isdir(output_iter_dir):
+            os.mkdir(output_iter_dir)
 
         # Clear model, and create it
         model = None
@@ -290,36 +168,45 @@ def cross_validation(X, y, y_binary, channels):
 
         history, model = train_model(model, xtrain, ytrain_binary, xval, yval)
 
+        model.save(output_iter_dir+"/Best_Model_Iteration_"+str(i+1)+".h5")
+        with open(output_iter_dir+'/Best_Model_History_Iteration_'+str(i+1), 'wb') as file_pi:
+            pickle.dump(history.history, file_pi)
+
         accuracy_history = history.history['acc']
         val_accuracy_history = history.history['val_acc']
         logging.info("Last training accuracy: " + str(accuracy_history[-1]) + ", last validation accuracy: " + str(
             val_accuracy_history[-1]))
 
-        score_test = model.evaluate(xtest, ytest_binary, verbose=False)
+        score_test = model.evaluate(X_test, y_binary_test, verbose=False)
         logging.info('Test loss and accuracy of best model: ' + str(score_test))
 
-        results = evaluate_model(model, xtest, ytest, ytest_binary, results, index, channels,
+        results, probs = evaluate_model(model, X_test, y_test, y_binary_test, results, i, channels, output_iter_dir,
                                  train_set_size=xtrain.shape[0],
-                                 validation_set_size = xval.shape[0]
-        )
-        #evaluate_model(model, X_test, y_test_binary, results, index, channels)
+                                 validation_set_size=xval.shape[0])
 
+        with open(output_iter_dir+"/Called_Test_SVs.txt", "w") as out_sv:
+            out_sv.write("Chromosome\tStart\tEnd\tProbs[DEL]\tProbs[No_DEL]\n")
+            for k in range(0, len(win_ids_test)):
+                out_sv.write("\t".join(["\t".join(win_ids_test[k].split("_")), str(probs[k][0]), str(probs[k][1])])+"\n")
     return results
 
 
 def train_model(model, xtrain, ytrain, xval, yval):
 
     train_set_size = xtrain.shape[0]
-
+    #print(xtrain.shape)
+    #print(ytrain.shape)
+    #print(xval.shape)
+    #print(yval.shape)
     histories, val_accuracies, val_losses = find_architecture.train_models_on_samples(xtrain, ytrain,
                                                                                       xval, yval,
-                                                                                      model, nr_epochs=1,
+                                                                                      model, nr_epochs=10,
                                                                                       subset_size=train_set_size,
                                                                                       verbose=False)
 
     best_model_index = np.argmax(val_accuracies)
     best_model, best_params, best_model_types = model[best_model_index]
-    # logging.info(best_model_index, best_model_types, best_params)
+    #logging.info(best_model_index, best_model_types, best_params)
 
     nr_epochs = 10
     history = best_model.fit(xtrain, ytrain,
@@ -329,7 +216,7 @@ def train_model(model, xtrain, ytrain, xval, yval):
     return history, best_model
 
 
-def evaluate_model(model, X_test, y_test, ytest_binary, results, cv_iter, channels,
+def evaluate_model(model, X_test, y_test, ytest_binary, results, cv_iter, channels, output_dir,
                    train_set_size, validation_set_size):
 
     #Generate classes
@@ -339,15 +226,15 @@ def evaluate_model(model, X_test, y_test, ytest_binary, results, cv_iter, channe
         mapclasses[c] = i
 
     dict_sorted = sorted(mapclasses.items(), key=lambda x: x[1])
+    #print(dict_sorted)
     # logging.info(dict_sorted)
     class_labels = [i[0] for i in dict_sorted]
-
+    #print(class_labels)
     n_classes = ytest_binary.shape[1]
     # logging.info(ytest_binary)
     # logging.info(n_classes)
 
     probs = model.predict_proba(X_test, batch_size=1, verbose=False)
-
     # generate confusion matrix
     labels = sorted(list(set(y_test)))
     predicted = probs.argmax(axis=1)
@@ -357,7 +244,7 @@ def evaluate_model(model, X_test, y_test, ytest_binary, results, cv_iter, channe
     confusion_matrix.columns = [labels[i] for i in confusion_matrix.columns]
     confusion_matrix.reindex(columns=[l for l in labels], fill_value=0)
     logging.info(confusion_matrix)
-    confusion_matrix.to_csv(path_or_buf='OC/OC_confusion_matrix_cv_iter_' + str(cv_iter + 1) + '.csv')
+    confusion_matrix.to_csv(path_or_buf=output_dir+'/NA12878_confusion_matrix_cv_iter_' + str(cv_iter + 1) + '.csv')
 
     # print(np.diag(confusion_matrix))
     # print(confusion_matrix.sum(axis=1))
@@ -386,11 +273,12 @@ def evaluate_model(model, X_test, y_test, ytest_binary, results, cv_iter, channe
 
     results = results.append({
         "channels": channels,
-        "fold": cv_iter+1,
+        "iter": cv_iter+1,
         "training_set_size": train_set_size,
         "validation_set_size": validation_set_size,
         "test_set_size": X_test.shape[0],
-        "average_precision_score": average_precision["micro"]
+        "average_precision_score": average_precision["micro"],
+        "F1 Score":
     }, ignore_index=True)
 
     plt.figure()
@@ -406,7 +294,7 @@ def evaluate_model(model, X_test, y_test, ytest_binary, results, cv_iter, channe
         'Average precision score, micro-averaged over all classes: AP={0:0.2f}'
             .format(average_precision["micro"]))
 
-    plt.savefig('OC/Precision_Recall_avg_prec_score_Iter_'+str(cv_iter)+'_'+channels+'.png', bbox_inches='tight')
+    plt.savefig(output_dir+'/Precision_Recall_avg_prec_score_Iter_'+str(cv_iter)+'_'+channels+'.png', bbox_inches='tight')
     plt.close()
 
     from itertools import cycle
@@ -445,7 +333,7 @@ def evaluate_model(model, X_test, y_test, ytest_binary, results, cv_iter, channe
     plt.title('Extension of Precision-Recall curve to multi-class')
     plt.legend(lines, labels, loc=(0, -.38), prop=dict(size=14))
 
-    plt.savefig('OC/Precision_Recall_avg_prec_score_per_class_Iter_' +
+    plt.savefig(output_dir+'/Precision_Recall_avg_prec_score_per_class_Iter_' +
                 str(cv_iter) +'_'+channels+'.png', bbox_inches='tight')
     plt.close()
 
@@ -480,10 +368,10 @@ def evaluate_model(model, X_test, y_test, ytest_binary, results, cv_iter, channe
     #     # show the plot
     #     plt.savefig('Plots/Precision_Recall_multiclass_Iter_'+str(cv_iter)+'_'+channels+'.png', bbox_inches='tight')
 
-    return results
+    return results, probs
 
 
-def run_cv():
+def run_cv(output_dir_test):
 
     labels = get_channel_labels()
 
@@ -496,21 +384,18 @@ def run_cv():
 
     # Load the data
     X, y, y_binary, win_ids = data(datapath_training)
-    # BND
-    # removed_labels = ['INV_start', 'INV_end', 'DEL_start', 'DEL_end', 'DUP_start', 'DUP_end']
-    # X, y, y_binary, win_ids = remove_classes(X, y, win_ids, removed_labels)
 
-    # X_test, y_test, y_test_binary, win_ids_test = data(datapath_test)
+    X_test, y_test, y_binary_test, win_ids_test = data(datapath_test)
 
-    results = results.append(cross_validation(X, y, y_binary, channels))
+    results = results.append(cross_validation(X, y, y_binary, channels, X_test, y_test, y_binary_test, output_dir_test, win_ids_test))
 
     logging.info(results)
-    results.to_csv("OC/CV_results.csv", sep='\t')
+    results.to_csv(output_dir_test+"/CV_results.csv", sep='\t')
 
 
-def plot_results():
+def plot_results(output_dir_test):
 
-    source = pd.read_csv(filepath_or_buffer='OC/CV_results.csv', delimiter='\t')
+    source = pd.read_csv(filepath_or_buffer=output_dir_test+'/CV_results.csv', delimiter='\t')
 
     import numpy as np
     import matplotlib.pyplot as plt
@@ -533,31 +418,25 @@ def plot_results():
     plt.ylim(bottom=0.8)
     plt.tight_layout()
 
-    plt.savefig('OC/Results.png', bbox_inches='tight')
+    plt.savefig(output_dir_test+'/Results.png', bbox_inches='tight')
     plt.close()
 
 
 def main():
 
-    basedir = 'OC'
-    if not os.path.isdir(basedir):
-        os.mkdir(basedir)
+    output_dir_test = 'NA12878_CNN_results/delly'
+    if not os.path.isdir(output_dir_test):
+        os.mkdir('NA12878_CNN_results')
+        os.mkdir('NA12878_CNN_results/delly')
 
     FORMAT = '%(asctime)s %(message)s'
     logging.basicConfig(
         format=FORMAT,
-        filename=os.path.join(basedir, 'logfile.log'),
+        filename=os.path.join(output_dir_test, 'logfile.log'),
         level=logging.INFO)
 
-    # get_channel_labels_TN()
-    run_cv()
-    plot_results()
-
-    # logging.info('Loading data...')
-    # X, y, y_binary, win_ids = data(datapath_training)
-    # logging.info(X.shape)
-    # logging.info('Plotting channels...')
-    # plot_channels(X, y, win_ids)
+    run_cv(output_dir_test)
+    plot_results(output_dir_test)
 
 
 if __name__ == '__main__':
