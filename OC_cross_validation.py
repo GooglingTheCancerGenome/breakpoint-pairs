@@ -450,20 +450,20 @@ def main():
 
     args = parser.parse_args()
 
-    HPC_MODE = False
+    HPC_MODE = True
 
-    datapath_prefix = '/hpc/cog_bioinf/ridder/users/smehrem/breakpoint-pairs' if HPC_MODE else '/home/cog/smehrem/breakpoint-pairs/'
+    datapath_prefix = '/hpc/cog_bioinf/ridder/users/smehrem/breakpoint-pairs/' if HPC_MODE else '/home/cog/smehrem/breakpoint-pairs/'
 
     if HPC_MODE:
-        datapath_training = datapath_prefix + '/Processed/Test/' + \
-                            date + '/TrainingData/'
-        datapath_test = datapath_prefix + '/Processed/Test/' + \
-                        date + '/TestData/'
+        datapath_training = datapath_prefix + "N12878_DEL_TrainingData_" + args.caller + ".npz"
+        datapath_test = datapath_prefix + "N12878_DEL_TestData_" + args.caller + ".npz"
+
+
     else:
         datapath_training = datapath_prefix + "N12878_DEL_TrainingData_"+args.caller+".npz"
         datapath_test = datapath_prefix + "N12878_DEL_TestData_"+args.caller+".npz"
 
-    output_dir_test = 'NA12878_CNN_results_'+str(int(args.split*100))+'_'+str(args.epochs)+'_'+str(args.learningrate)+"_"+args.caller
+    output_dir_test = datapath_prefix+'NA12878_CNN_results_'+str(int(args.split*100))+'_'+str(args.epochs)+'_'+str(args.learningrate)+"_"+args.caller
     if not os.path.isdir(output_dir_test):
         os.mkdir(output_dir_test)
 
