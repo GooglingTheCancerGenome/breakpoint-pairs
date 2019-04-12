@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 # Imports
 import gzip
 import os
@@ -47,21 +49,6 @@ import argparse
 
 import logging
 
-
-HPC_MODE = False
-#sample_name = 'OC'
-#date = '070119'
-#label_type = 'bpi'
-datapath_prefix = '/hpc/cog_bioinf/ridder/users/smehrem/breakpoint-pairs' if HPC_MODE else '/home/cog/smehrem/breakpoint-pairs/'
-
-if HPC_MODE:
-    datapath_training =  datapath_prefix+'/Processed/Test/'+\
-               date+'/TrainingData/'
-    datapath_test =  datapath_prefix+'/Processed/Test/'+\
-               date+'/TestData/'
-else:
-    datapath_training = datapath_prefix + "N12878_DEL_TrainingData.npz"
-    datapath_test = datapath_prefix + "N12878_DEL_TestData.npz"
 
 def get_classes(labels):
     return sorted(list(set(labels)))
@@ -151,7 +138,7 @@ def cross_validation(X, y, y_binary, channels, X_test, y_test, y_binary_test, ou
     #print(yval.shape)
     #print(ytrain_binary)
     #print(yval)
-    for i in range(0, 1):
+    for i in range(0, 10):
         logging.info("Training model " + str(i + 1) + "/10...")
 
         output_iter_dir = output_dir_test+'/Training_Iteration_' + str(i + 1)
@@ -398,7 +385,7 @@ def evaluate_model(model, X_test, y_test, ytest_binary, results, cv_iter, channe
     return results, probs
 
 
-def run_cv(output_dir_test, split, epochs, lr):
+def run_cv(output_dir_test, datapath_training, datapath_test, split, epochs, lr):
 
     labels = get_channel_labels()
 
@@ -458,11 +445,25 @@ def main():
                         help="Number of epochs to be trained on")
     parser.add_argument('-lr', '--learningrate', type=int, default=2,
                         help="Exponent for learning rate parameter in McFly")
+    parser.add_argument('-cal', '--caller', type=str, default='delly', help='Caller whose SVs are used for training.')
 
 
     args = parser.parse_args()
 
-    output_dir_test = 'NA12878_CNN_results_'+str(int(args.split*100))+'_'+str(args.epochs)+'_'+str(args.learningrate)+'_delly'
+    HPC_MODE = False
+
+    datapath_prefix = '/hpc/cog_bioinf/ridder/users/smehrem/breakpoint-pairs' if HPC_MODE else '/home/cog/smehrem/breakpoint-pairs/'
+
+    if HPC_MODE:
+        datapath_training = datapath_prefix + '/Processed/Test/' + \
+                            date + '/TrainingData/'
+        datapath_test = datapath_prefix + '/Processed/Test/' + \
+                        date + '/TestData/'
+    else:
+        datapath_training = datapath_prefix + "N12878_DEL_TrainingData_"+args.caller+".npz"
+        datapath_test = datapath_prefix + "N12878_DEL_TestData_"+args.caller+".npz"
+
+    output_dir_test = 'NA12878_CNN_results_'+str(int(args.split*100))+'_'+str(args.epochs)+'_'+str(args.learningrate)+"_"+args.caller
     if not os.path.isdir(output_dir_test):
         os.mkdir(output_dir_test)
 
@@ -473,7 +474,7 @@ def main():
         filename=os.path.join(output_dir_test, 'logfile.log'),
         level=logging.INFO)
 
-    run_cv(output_dir_test, split=args.split, epochs=args.epochs, lr=args.learningrate)
+    run_cv(output_dir_test,  datapath_training, datapath_test, split=args.split, epochs=args.epochs, lr=args.learningrate)
     plot_results(output_dir_test)
 
 
