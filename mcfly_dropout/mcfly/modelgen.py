@@ -192,7 +192,7 @@ def generate_DeepConvLSTM_model(
 
 
 def generate_CNN_model(x_shape, class_number, filters, fc_hidden_nodes,
-                       learning_rate=0.01, regularization_rate=0.01, kernel_size = 3):
+                       learning_rate=0.01, regularization_rate=0.01, kernel_size = 3, drp_out=0.5):
     """
     Generate a convolutional neural network (CNN) model.
 
@@ -214,6 +214,8 @@ def generate_CNN_model(x_shape, class_number, filters, fc_hidden_nodes,
         regularization rate
     kernel_size : int
         width of the kernel in a convolutional layer
+    dropout_rate : float
+        
     Returns
     -------
     model : Keras model
@@ -236,6 +238,7 @@ def generate_CNN_model(x_shape, class_number, filters, fc_hidden_nodes,
         model.add(BatchNormalization())
         model.add(Activation('relu'))
     model.add(Flatten())
+    model.add(Dropout(drp_out))
     model.add(Dense(units=fc_hidden_nodes,
                     kernel_regularizer=l2(regularization_rate),
                     kernel_initializer=weightinit))  # Fully connected layer
