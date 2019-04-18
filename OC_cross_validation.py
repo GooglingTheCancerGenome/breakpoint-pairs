@@ -100,7 +100,11 @@ def create_model(X, y_binary, lr):
                                       cnn_max_fc_nodes=6,
                                       low_lr=lr, high_lr=lr,
                                       low_reg=1, high_reg=1,
-                                      kernel_size=7)
+                                      kernel_size=7,
+                                      max_drp_out1=0.5,
+                                      max_drp_out2=0.5,
+                                      min_drp_out1=0.5,
+                                      min_drp_out2=0.5)
 
     # models = modelgen.generate_models(X.shape,
     #                                   y_binary.shape[1],
@@ -450,7 +454,7 @@ def main():
 
     args = parser.parse_args()
 
-    HPC_MODE = True
+    HPC_MODE = False
 
     datapath_prefix = '/hpc/cog_bioinf/ridder/users/smehrem/breakpoint-pairs/' if HPC_MODE else '/home/cog/smehrem/breakpoint-pairs/'
 

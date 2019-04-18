@@ -7,8 +7,8 @@
 #$ -e logs
 
 
-conda activate breakpoint-pairs
-conda activate mcfly
+#conda activate breakpoint-pairs
+#conda activate mcfly
 
 spl=$1
 epo=$2
