@@ -1,5 +1,5 @@
 #!/bin/bash
-#$ -l h_rt=03:00:00
+#$ -l h_rt=24:00:00
 #$ -l h_vmem=10G
 #$ -cwd
 #$ -N CNN_Train_DellyDels
@@ -7,7 +7,6 @@
 #$ -e logs
 
 
-conda activate breakpoint-pairs
 conda activate mcfly
 
 spl=$1
