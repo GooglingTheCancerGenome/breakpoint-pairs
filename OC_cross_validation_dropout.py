@@ -457,7 +457,7 @@ def main():
 
     args = parser.parse_args()
 
-    HPC_MODE = False
+    HPC_MODE = True
 
     datapath_prefix = '/hpc/cog_bioinf/ridder/users/smehrem/breakpoint-pairs/' if HPC_MODE else '/home/cog/smehrem/breakpoint-pairs/'
 
@@ -471,7 +471,7 @@ def main():
         datapath_test = datapath_prefix + "N12878_DEL_TestData_"+args.caller+".npz"
 
     output_dir_test = datapath_prefix+'NA12878_CNN_results_'+str(int(args.split*100))+'_'+str(args.epochs)+'_' + \
-                      str(args.learningrate)+"_"+args.caller+"_"+str(args.dropout1*100)+"_"+str(args.dropout2*100)
+                      str(args.learningrate)+"_"+args.caller+"_"+str(int(args.dropout1*100))+"_"+str(inst(args.dropout2*100))
     if not os.path.isdir(output_dir_test):
         os.mkdir(output_dir_test)
 
