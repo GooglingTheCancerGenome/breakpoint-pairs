@@ -166,7 +166,7 @@ def get_one_hot_sequence_by_list(chrname, positions, HPC_MODE):
         genome = twobit.TwoBitFile('/hpc/cog_bioinf/ridder/users/lsantuari/Datasets/genomes/hg19.2bit')
     else:
         # Path on the local machine of the 2bit version of the human reference genome (hg19)
-        genome = twobit.TwoBitFile('/home/cog/smehrem/MinorResearchInternship/hg19.2bit')
+        genome = twobit.TwoBitFile('/hpc/cog_bioinf/ridder/users/lsantuari/Datasets/genomes/hg19.2bit')
 
     if chrname == 'MT':
         chrname = 'M'
