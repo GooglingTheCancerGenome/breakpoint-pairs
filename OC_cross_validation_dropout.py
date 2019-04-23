@@ -471,7 +471,7 @@ def main():
         datapath_test = datapath_prefix + "N12878_DEL_TestData_"+args.caller+".npz"
 
     output_dir_test = datapath_prefix+'NA12878_CNN_results_'+str(int(args.split*100))+'_'+str(args.epochs)+'_' + \
-                      str(args.learningrate)+"_"+args.caller+"_"+str(int(args.dropout1*100))+"_"+str(inst(args.dropout2*100))
+                      str(args.learningrate)+"_"+args.caller+"_"+str(int(args.dropout1*100))+"_"+str(int(args.dropout2*100))
     if not os.path.isdir(output_dir_test):
         os.mkdir(output_dir_test)
 
