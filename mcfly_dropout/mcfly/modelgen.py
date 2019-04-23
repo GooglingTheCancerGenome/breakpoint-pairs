@@ -103,7 +103,7 @@ def generate_models(
             hyperparameters = generate_CNN_hyperparameter_set(
                 min_layers=cnn_min_layers, max_layers=cnn_max_layers,
                 min_filters=cnn_min_filters, max_filters=cnn_max_filters,
-                kernel_size = kernel_size, 
+                kernel_size=kernel_size,
                 min_fc_nodes=cnn_min_fc_nodes, max_fc_nodes=cnn_max_fc_nodes,
                 low_lr=low_lr, high_lr=high_lr, low_reg=low_reg,
                 high_reg=high_reg,  min_drp_out1=min_drp_out1, max_drp_out1=max_drp_out1,
@@ -272,7 +272,7 @@ def generate_CNN_hyperparameter_set(min_layers=1, max_layers=10,
                                     min_filters=10, max_filters=100,
                                     min_fc_nodes=10, max_fc_nodes=2000,
                                     low_lr=1, high_lr=4, low_reg=1,
-                                    high_reg=4, kernel_size = 3, min_drp_out1=0.0,
+                                    high_reg=4, kernel_size=3, min_drp_out1=0.0,
                                     max_drp_out1=0.0,
                                     min_drp_out2=0.0,
                                     max_drp_out2=0.0):
@@ -306,10 +306,14 @@ def generate_CNN_hyperparameter_set(min_layers=1, max_layers=10,
         sampled between `10**(-low_reg)` and `10**(-high_reg)`
     kernel_size : int
         width of the kernel in a convolutional layer
-    drp_out1 : float
-        Dropout rate before first dense layer
-    drp_out2 : float
-        Dropout rate before second dense layer
+    min_drp_out1 : float
+        Min dropout rate before first dense layer
+    max_drp_out1 : float
+        Max dropout rate before first dense layer
+    min_drp_out2 : float
+        Min dropout rate before second dense layer
+    min_drp_out2 : float
+        Max dropout rate before second dense layer
     Returns
     ----------
     hyperparameters : dict
@@ -323,8 +327,8 @@ def generate_CNN_hyperparameter_set(min_layers=1, max_layers=10,
     hyperparameters['fc_hidden_nodes'] = np.random.randint(
         min_fc_nodes, max_fc_nodes + 1)
     hyperparameters['kernel_size'] = kernel_size
-    hyperparameters['drop_out1'] = np.random.uniform(min_drp_out1,max_drp_out1+0.1)
-    hyperparameters['drop_out2'] = np.random.uniform(min_drp_out2,max_drp_out2+0.1)
+    hyperparameters['drp_out1'] = np.random.uniform(min_drp_out1, max_drp_out1+0.1)
+    hyperparameters['drp_out2'] = np.random.uniform(min_drp_out2, max_drp_out2+0.1)
 
     return hyperparameters
 
