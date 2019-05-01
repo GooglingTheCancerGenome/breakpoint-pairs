@@ -460,6 +460,7 @@ def main():
     parser.add_argument('-cal', '--caller', type=str, default='delly', help='Caller whose SVs are used for training.')
     parser.add_argument('-drp1', '--dropout1', type=float, default=0.0, help='Dropout rate for first layer.')
     parser.add_argument('-drp2', '--dropout2', type=float, default=0.0, help='Dropout rate for second layer.')
+    parser.add_argument('-stack', '--stacked', type=str, default="n", help='Whether windows are side by side or on top of each other')
 
 
 
@@ -480,6 +481,8 @@ def main():
 
     output_dir_test = datapath_prefix+'NA12878_CNN_results_'+str(int(args.split*100))+'_'+str(args.epochs)+'_' + \
                       str(args.learningrate)+"_"+args.caller+"_"+str(int(args.dropout1*100))+"_"+str(int(args.dropout2*100))
+    if args.stacked == "y":
+        output_dir_test = output_dir_test + "_stacked"
     if not os.path.isdir(output_dir_test):
         os.mkdir(output_dir_test)
 
