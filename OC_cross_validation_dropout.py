@@ -471,8 +471,12 @@ def main():
     datapath_prefix = '/hpc/cog_bioinf/ridder/users/smehrem/breakpoint-pairs/' if HPC_MODE else '/home/cog/smehrem/breakpoint-pairs/'
 
     if HPC_MODE:
-        datapath_training = datapath_prefix + "N12878_DEL_TrainingData_" + args.caller + ".npz"
-        datapath_test = datapath_prefix + "N12878_DEL_TestData_" + args.caller + ".npz"
+        if args.stacked == "y":
+            datapath_training = datapath_prefix + "N12878_DEL_TrainingData_" + args.caller + "_stacked.npz"
+            datapath_test = datapath_prefix + "N12878_DEL_TestData_" + args.caller + "_stacked.npz"
+        else:
+            datapath_training = datapath_prefix + "N12878_DEL_TrainingData_" + args.caller + ".npz"
+            datapath_test = datapath_prefix + "N12878_DEL_TestData_" + args.caller + ".npz"
 
 
     else:
