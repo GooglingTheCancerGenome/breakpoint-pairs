@@ -8,8 +8,19 @@ def load_npygz(filepath):
         a = np.load(f)
     return a
 
+def stack_ontop(window_array):
+    new_windows = []
+    for pair in window_array:
+        sliced1 = pair[0:200, ::]
+        sliced2 = pair[210::, ::]
+        new_windows += [np.concatenate([sliced1, sliced2], axis=1)]
+    new_windows = np.asarray(new_windows)
+    return new_windows
 
-chr_list=[]
+
+windows_ontop = False
+
+chr_list = []
 with open("/home/cog/smehrem/MinorResearchInternship/BAM/BAM_chr_list", "r") as f:
     for line in f:
         line = line.strip()
@@ -116,6 +127,15 @@ for caller in callers:
     y_train_binary = to_categorical(y_train)
     y_test_binary = to_categorical(y_test)
 
+    if windows_ontop:
+        windowpairs_all = stack_ontop(windowpairs_all)
+        test_set_windowpairs_all = stack_ontop(test_set_windowpairs_all)
+        np.savez("N12878_DEL_TrainingData_"+caller+"_stacked", X=windowpairs_all, y=labels_all, y_binary=y_train_binary, ids=ids_all)
+        np.savez("N12878_DEL_TestData_"+caller+"_stacked", X=test_set_windowpairs_all, y=test_set_labels_all, y_binary=y_test_binary, ids=test_set_ids_all)
+    else:
+        np.savez("N12878_DEL_TrainingData_"+caller, X=windowpairs_all, y=labels_all, y_binary=y_train_binary, ids=ids_all)
+        np.savez("N12878_DEL_TestData_"+caller, X=test_set_windowpairs_all, y=test_set_labels_all, y_binary=y_test_binary, ids=test_set_ids_all)
+
     print(caller)
     print("\t".join([str(windowpairs.shape), str(windowpair_ids.shape), str(len(labels))]))
 
@@ -131,6 +151,4 @@ for caller in callers:
     print('\n\n')
 
 
-    np.savez("N12878_DEL_TrainingData_"+caller, X=windowpairs_all, y=labels_all, y_binary=y_train_binary, ids=ids_all)
-    np.savez("N12878_DEL_TestData_"+caller, X=test_set_windowpairs_all, y=test_set_labels_all, y_binary=y_test_binary, ids=test_set_ids_all)
 

@@ -11,6 +11,7 @@ matplotlib.use('Qt4Agg')
 import matplotlib.pyplot as plt
 plt.switch_backend('agg')
 import pickle
+import time
 
 import math
 
@@ -157,7 +158,7 @@ def cross_validation(X, y, y_binary, channels, X_test, y_test, y_binary_test, ou
         logging.info ("Training new iteration on " + str(xtrain.shape[0]) + " training samples, " +
          str(xval.shape[0]) + " validation samples, this may take a while...")
 
-        history, model = train_model(model, xtrain, ytrain_binary, xval, yval, epochs)
+        history, model = train_model(model, xtrain, ytrain_binary, xval, yval, epochs, i)
 
         model.save(output_iter_dir+"/Best_Model_Iteration_"+str(i+1)+".h5")
         with open(output_iter_dir+'/Best_Model_History_Iteration_'+str(i+1), 'wb') as file_pi:
@@ -182,7 +183,7 @@ def cross_validation(X, y, y_binary, channels, X_test, y_test, y_binary_test, ou
     return results
 
 
-def train_model(model, xtrain, ytrain, xval, yval, epochs):
+def train_model(model, xtrain, ytrain, xval, yval, epochs, i):
 
     train_set_size = xtrain.shape[0]
     #print(xtrain.shape)
@@ -200,9 +201,13 @@ def train_model(model, xtrain, ytrain, xval, yval, epochs):
     #logging.info(best_model_index, best_model_types, best_params)
 
     nr_epochs = epochs
+    train_start = time.time()
     history = best_model.fit(xtrain, ytrain,
                              epochs=nr_epochs, validation_data=(xval, yval),
                              verbose=False)
+    train_end = time.time()
+    train_time = train_end - train_start
+    logging.info("TRAINTIME: Training time Iteration " + str(i + 1) + ": " + str(train_time))
 
     return history, best_model
 
@@ -224,8 +229,11 @@ def evaluate_model(model, X_test, y_test, ytest_binary, results, cv_iter, channe
     n_classes = ytest_binary.shape[1]
     # logging.info(ytest_binary)
     # logging.info(n_classes)
-
+    test_start = time.time()
     probs = model.predict_proba(X_test, batch_size=1, verbose=False)
+    test_end = time.time()
+    test_time = test_end - test_start
+    logging.info("TESTTIME: Test time Iteration " + str(i + 1) + ": " + str(test_time))
     # generate confusion matrix
     labels = sorted(list(set(y_test)))
     predicted = probs.argmax(axis=1)
