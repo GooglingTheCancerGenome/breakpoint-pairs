@@ -18,5 +18,5 @@ drp1=$5
 drp2=$6
 stack=$7
 
-./OC_cross_validation.py -spl $spl -epo $epo -lr $lra -cal $cal -drp1 $drp1 -drp2 $drp2 -stack $stack
+./OC_cross_validation_dropout.py -spl $spl -epo $epo -lr $lra -cal $cal -drp1 $drp1 -drp2 $drp2 -stack $stack
 
