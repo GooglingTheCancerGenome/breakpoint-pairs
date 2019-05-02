@@ -168,8 +168,11 @@ def cross_validation(X, y, y_binary, channels, X_test, y_test, y_binary_test, ou
         val_accuracy_history = history.history['val_acc']
         logging.info("Last training accuracy: " + str(accuracy_history[-1]) + ", last validation accuracy: " + str(
             val_accuracy_history[-1]))
-
+        test_start = time.time()
         score_test = model.evaluate(X_test, y_binary_test, verbose=False)
+        test_end = time.time()
+        test_time = test_end - test_start
+        logging.info("TESTTIME2: Test time Iteration " + str(i + 1) + ": " + str(test_time))
         logging.info('Test loss and accuracy of best model: ' + str(score_test))
 
         results, probs = evaluate_model(model, X_test, y_test, y_binary_test, results, i, channels, output_iter_dir, epochs, hist=history.history,
@@ -233,7 +236,7 @@ def evaluate_model(model, X_test, y_test, ytest_binary, results, cv_iter, channe
     probs = model.predict_proba(X_test, batch_size=1, verbose=False)
     test_end = time.time()
     test_time = test_end - test_start
-    logging.info("TESTTIME: Test time Iteration " + str(i + 1) + ": " + str(test_time))
+    logging.info("TESTTIME: Test time Iteration " + str(cv_iter + 1) + ": " + str(test_time))
     # generate confusion matrix
     labels = sorted(list(set(y_test)))
     predicted = probs.argmax(axis=1)
