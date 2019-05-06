@@ -257,10 +257,13 @@ def evaluate_model(model, X_test, y_test, ytest_binary, results, cv_iter, channe
     # For each class
     precision = dict()
     recall = dict()
+    f1 = dict()
     average_precision = dict()
+    average_f1 = dict()
     for i in range(n_classes):
         precision[i], recall[i], _ = precision_recall_curve(ytest_binary[:, i],
                                                             probs[:, i])
+        f1[i] = (precision[i]*recall[i])/(precision[i]+recall[i])
         average_precision[i] = average_precision_score(ytest_binary[:, i], probs[:, i])
 
     # A "micro-average": quantifying score on all classes jointly
@@ -268,8 +271,8 @@ def evaluate_model(model, X_test, y_test, ytest_binary, results, cv_iter, channe
                                                                     probs.ravel())
     average_precision["micro"] = average_precision_score(ytest_binary, probs,
                                                          average="micro")
-    average_precision["micro"] = average_precision_score(ytest_binary, probs,
-                                                         average="micro")
+
+    average_f1["micro"] = f1_score(ytest_binary, probs, average="micro")
     logging.info('Average precision score, micro-averaged over all classes: {0:0.2f}'
           .format(average_precision["micro"]))
 
@@ -280,7 +283,7 @@ def evaluate_model(model, X_test, y_test, ytest_binary, results, cv_iter, channe
         "validation_set_size": validation_set_size,
         "test_set_size": X_test.shape[0],
         "average_precision_score": average_precision["micro"],
-        #"F1 Score":
+        "F1 Score": average_f1["micro"]
     }, ignore_index=True)
 
     plt.figure()
