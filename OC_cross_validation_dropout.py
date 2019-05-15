@@ -259,7 +259,7 @@ def evaluate_model(model, X_test, y_test, ytest_binary, results, cv_iter, channe
     recall = dict()
     f1 = dict()
     average_precision = dict()
-    average_f1 = dict()
+    #average_f1 = dict()
     for i in range(n_classes):
         precision[i], recall[i], _ = precision_recall_curve(ytest_binary[:, i],
                                                             probs[:, i])
@@ -272,7 +272,7 @@ def evaluate_model(model, X_test, y_test, ytest_binary, results, cv_iter, channe
     average_precision["micro"] = average_precision_score(ytest_binary, probs,
                                                          average="micro")
 
-    average_f1["micro"] = f1_score(ytest_binary, probs, average="micro")
+    #average_f1["micro"] = f1_score(ytest_binary, probs, average="micro")
     logging.info('Average precision score, micro-averaged over all classes: {0:0.2f}'
           .format(average_precision["micro"]))
 
@@ -282,9 +282,7 @@ def evaluate_model(model, X_test, y_test, ytest_binary, results, cv_iter, channe
         "training_set_size": train_set_size,
         "validation_set_size": validation_set_size,
         "test_set_size": X_test.shape[0],
-        "average_precision_score": average_precision["micro"],
-        "F1 Score": average_f1["micro"]
-    }, ignore_index=True)
+        "average_precision_score": average_precision["micro"]}, ignore_index=True)
 
     plt.figure()
     plt.step(recall['micro'], precision['micro'], color='b', alpha=0.2,
