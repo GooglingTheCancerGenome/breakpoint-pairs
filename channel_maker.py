@@ -247,7 +247,7 @@ def channel_maker(chrom, sampleName, vcf_file_list, sv_type_list, outFile, negat
             for split_direction in direction_list[current_channel]:
                 channel_log.write(current_channel + "_" + split_direction + "\n")
                 channel_pos = set(positions) & set(channel_data[chrom][current_channel][split_direction].keys())
-                payload = [ channel_data[chrom][current_channel][split_direction][pos] if pos in channel_pos else 0 \
+                payload = [channel_data[chrom][current_channel][split_direction][pos] if pos in channel_pos else 0 \
                  for pos in positions ]
                 payload = np.array(payload)
                 payload.shape = channel_windows[:, idx, channel_index].shape
