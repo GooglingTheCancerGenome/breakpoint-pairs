@@ -467,6 +467,10 @@ def main():
     parser.add_argument('-drp1', '--dropout1', type=float, default=0.0, help='Dropout rate for first layer.')
     parser.add_argument('-drp2', '--dropout2', type=float, default=0.0, help='Dropout rate for second layer.')
     parser.add_argument('-stack', '--stacked', type=str, default="n", help='Whether windows are side by side or on top of each other')
+    parser.add_argument('-outpre', '--outdir_prefix', type=str, default="",
+                        help='Output directory')
+    parser.add_argument('-input', '--input_data', type=str, default="",
+                        help='Path to input data (dir names only)')
 
 
 
@@ -476,23 +480,34 @@ def main():
 
     datapath_prefix = '/hpc/cog_bioinf/ridder/users/smehrem/breakpoint-pairs/' if HPC_MODE else '/home/cog/smehrem/breakpoint-pairs/'
 
+    if args.input_data != "":
+        datapath_traintest = datapath_prefix + args.input_data+"/"
+    else:
+        datapath_traintest = datapath_prefix
+
     if HPC_MODE:
         if args.stacked == "y":
-            datapath_training = datapath_prefix + "N12878_DEL_TrainingData_" + args.caller + "_stacked.npz"
-            datapath_test = datapath_prefix + "N12878_DEL_TestData_" + args.caller + "_stacked.npz"
+            datapath_training = datapath_traintest + "N12878_DEL_TrainingData_" + args.caller + "_stacked.npz"
+            datapath_test = datapath_traintest + "N12878_DEL_TestData_" + args.caller + "_stacked.npz"
         else:
-            datapath_training = datapath_prefix + "N12878_DEL_TrainingData_" + args.caller + ".npz"
-            datapath_test = datapath_prefix + "N12878_DEL_TestData_" + args.caller + ".npz"
+            datapath_training = datapath_traintest + "N12878_DEL_TrainingData_" + args.caller + ".npz"
+            datapath_test = datapath_traintest + "N12878_DEL_TestData_" + args.caller + ".npz"
 
 
     else:
-        datapath_training = datapath_prefix + "N12878_DEL_TrainingData_"+args.caller+".npz"
-        datapath_test = datapath_prefix + "N12878_DEL_TestData_"+args.caller+".npz"
+        datapath_training = datapath_traintest + "N12878_DEL_TrainingData_"+args.caller+".npz"
+        datapath_test = datapath_traintest + "N12878_DEL_TestData_"+args.caller+".npz"
 
-    output_dir_test = datapath_prefix+'NA12878_CNN_results_'+str(int(args.split*100))+'_'+str(args.epochs)+'_' + \
+    if args.outdir_prefix != "":
+        output_dir_test = datapath_prefix+"/"+args.outdir_prefix+'/NA12878_CNN_results_'+str(int(args.split*100))+'_'+str(args.epochs)+'_' + \
                       str(args.learningrate)+"_"+args.caller+"_"+str(int(args.dropout1*100))+"_"+str(int(args.dropout2*100))
+    else:
+        output_dir_test = datapath_prefix + '/NA12878_CNN_results_' + str(
+            int(args.split * 100)) + '_' + str(args.epochs) + '_' + str(args.learningrate) + "_" + args.caller + "_" + str(int(args.dropout1 * 100)) + "_" + str(int(args.dropout2 * 100))
+
     if args.stacked == "y":
         output_dir_test = output_dir_test + "_stacked"
+
     if not os.path.isdir(output_dir_test):
         os.mkdir(output_dir_test)
 
