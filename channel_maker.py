@@ -21,7 +21,7 @@ from labels import SVRecord_generic
 import sys
 
 # Flag used to set either paths on the local machine or on the HPC
-HPC_MODE = False
+HPC_MODE = True
 
 # Only clipped read positions supported by at least min_cr_support clipped reads are considered
 #min_cr_support = 3
@@ -94,10 +94,9 @@ def load_channels(sample, chr_list):
             logging.info('Loading data for channel %s' % ch)
             suffix = '.npy.bz2' if ch == 'coverage' else '.pbz2'
             if HPC_MODE:
-                filename = os.path.join(prefix, sample, ch, '_'.join([chrom, ch + suffix]))
-            else:
-                #filename ="/home/cog/smehrem/MinorResearchInternship/NA12878/"+ch+"/"+'_'.join([chrom, ch + suffix])
                 filename ="/hpc/cog_bioinf/ridder/users/lsantuari/Git/DeepSV_runs/060219/CNN/scripts/NA12878/"+ch+"/"+chrom+"_"+ch+suffix
+            else:
+                filename ="/home/cog/smehrem/MinorResearchInternship/NA12878/"+ch+"/"+'_'.join([chrom, ch + suffix])
             assert os.path.isfile(filename)
 
             logging.info('Reading %s for Chr%s' % (ch, chrom))
