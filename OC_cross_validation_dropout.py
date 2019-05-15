@@ -509,7 +509,7 @@ def main():
         output_dir_test = output_dir_test + "_stacked"
 
     if not os.path.isdir(output_dir_test):
-        os.mkdir(output_dir_test)
+        os.makedirs(output_dir_test)
 
 
     FORMAT = '%(asctime)s %(message)s'
