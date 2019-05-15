@@ -273,8 +273,9 @@ def evaluate_model(model, X_test, y_test, ytest_binary, results, cv_iter, channe
                                                          average="micro")
 
     #average_f1["micro"] = f1_score(ytest_binary, probs, average="micro")
-    logging.info('Average precision score, micro-averaged over all classes: {0:0.2f}'
-          .format(average_precision["micro"]))
+    logging.info('Average precision score, micro-averaged over all classes: {0:0.2f}'.format(average_precision["micro"]))
+    for key in f1:
+        logging.info("Iteration_"+str(cv_iter+1)+" - F1Score_"+str(key)+": "+str(f1[key]))
 
     results = results.append({
         "channels": channels,
