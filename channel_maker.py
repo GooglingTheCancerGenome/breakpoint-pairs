@@ -94,7 +94,7 @@ def load_channels(sample, chr_list):
             logging.info('Loading data for channel %s' % ch)
             suffix = '.npy.bz2' if ch == 'coverage' else '.pbz2'
             if HPC_MODE:
-                filename ="/hpc/cog_bioinf/ridder/users/lsantuari/Git/DeepSV_runs/060219/CNN/scripts/NA12878/"+ch+"/"+chrom+"_"+ch+suffix
+                filename ="/hpc/cog_bioinf/ridder/users/smehrem/breakpoint-pairs/NA12878_channel_data/"+ch+"/"+chrom+"_"+ch+suffix
             else:
                 filename ="/home/cog/smehrem/MinorResearchInternship/NA12878/"+ch+"/"+'_'.join([chrom, ch + suffix])
             assert os.path.isfile(filename)
