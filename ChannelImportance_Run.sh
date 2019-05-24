@@ -11,6 +11,6 @@
 conda activate breakpoint-pairs
 conda activate mcfly2
 
-./ChannelImportance_Testing.py -inmod $1 -testd $2 -calmod $3 -outpre $4 -neg $5 -iter $6 
+./ChannelImportance_Testing.py -inmod $1 -cal $2 -neg $3 -iter $4
 
 
