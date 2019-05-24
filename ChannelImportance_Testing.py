@@ -182,17 +182,18 @@ def main():
     parser = argparse.ArgumentParser(description='Training CNN on DELs')
     parser.add_argument('-inmod', '--input_model', type=str, default="",
                         help="Trained model to be tested on (path)")
-    parser.add_argument('-testd', '--test_data', type=str, default="",
-                        help="Test data to evaluate model")
-    parser.add_argument('-calmod', '--caller_model', type=str, default='delly', help='Caller model to be tested')
     parser.add_argument('-neg', '--negativeset', type=str, default="",
                         help='What negative set is used.')
-    parser.add_argument('-outpre', '--outdir_prefix', type=str, default="",
-                        help='Output directory')
     parser.add_argument('-iter', '--iteration', type=int, default=1,
-                        help='Output directory')
+                        help='Iteration of Model')
+
 
     args = parser.parse_args()
+    channels = []
+    with open("Channel_Labels.txt", "r") as inchannel:
+        for line in inchannel:
+            line = line.strip()
+            channels += [line]
 
     model = load_model(args.input_model)
 
@@ -200,18 +201,13 @@ def main():
 
     datapath_prefix = '/hpc/cog_bioinf/ridder/users/smehrem/breakpoint-pairs/' if HPC_MODE else '/home/cog/smehrem/breakpoint-pairs/'
 
-    datapath_test = args.test_data
+    for channel in channels:
 
-    if args.outdir_prefix != "" and args.negativeset != "":
-        output_dir_test = datapath_prefix + args.outdir_prefix + args.negativeset + 'NA12878_CNN_results_' + args.caller_model + "_model" + "_"+str(args.iteration)
-    else:
-        output_dir_test = datapath_prefix + '/NA12878_CNN_results_' + args.caller_model + "_model_" +str(args.iteration)
-
-
-    if not os.path.isdir(output_dir_test):
-        os.makedirs(output_dir_test)
-
-    run_cv(output_dir_test, datapath_test, model, args.iteration)
+        datapath_test = datapath_prefix + "Test_Training_Data/shuffled/"+args.negativeset+"/ N12878_DEL_TestData_"+channel+".npz"
+        output_dir_test = datapath_prefix + args.negativeset + "/"+channel+"/" + 'NA12878_CNN_results_' + args.caller_model + "_model" + "_"+str(args.iteration)
+        if not os.path.isdir(output_dir_test):
+            os.makedirs(output_dir_test)
+        run_cv(output_dir_test, datapath_test, model, args.iteration)
 
 
 if __name__ == '__main__':
