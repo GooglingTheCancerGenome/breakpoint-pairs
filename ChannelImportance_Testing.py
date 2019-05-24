@@ -183,11 +183,10 @@ def main():
     parser.add_argument('-inmod', '--input_model', type=str, default="",
                         help="Trained model to be tested on (path)")
     parser.add_argument('-testd', '--test_data', type=str, default="",
-                        help="Test data to evaluate model (only dir names)")
-    parser.add_argument('-cal', '--caller', type=str, default='delly', help='Caller whose SVs are used for testing.')
+                        help="Test data to evaluate model")
     parser.add_argument('-calmod', '--caller_model', type=str, default='delly', help='Caller model to be tested')
-    parser.add_argument('-stack', '--stacked', type=str, default="n",
-                        help='Whether windows are side by side or on top of each other')
+    parser.add_argument('-neg', '--negativeset', type=str, default="",
+                        help='What negative set is used.')
     parser.add_argument('-outpre', '--outdir_prefix', type=str, default="",
                         help='Output directory')
     parser.add_argument('-iter', '--iteration', type=int, default=1,
@@ -197,37 +196,21 @@ def main():
 
     model = load_model(args.input_model)
 
-    HPC_MODE = False
+    HPC_MODE = True
 
     datapath_prefix = '/hpc/cog_bioinf/ridder/users/smehrem/breakpoint-pairs/' if HPC_MODE else '/home/cog/smehrem/breakpoint-pairs/'
 
-    if args.test_data != "":
-        datapath_traintest = datapath_prefix + args.test_data + "/"
+    datapath_test = args.test_data
+
+    if args.outdir_prefix != "" and args.negativeset != "":
+        output_dir_test = datapath_prefix + args.outdir_prefix + args.negativeset + 'NA12878_CNN_results_' + args.caller_model + "_model" + "_"+str(args.iteration)
     else:
-        datapath_traintest = datapath_prefix
+        output_dir_test = datapath_prefix + '/NA12878_CNN_results_' + args.caller_model + "_model_" +str(args.iteration)
 
-    if HPC_MODE:
-        if args.stacked == "y":
-            datapath_test = datapath_traintest + "N12878_DEL_TestData_" + args.caller + "_stacked.npz"
-        else:
-            datapath_test = datapath_traintest + "N12878_DEL_TestData_" + args.caller + ".npz"
-
-
-    else:
-        datapath_test = datapath_traintest + "N12878_DEL_TestData_" + args.caller + ".npz"
-
-    if args.outdir_prefix != "":
-        output_dir_test = datapath_prefix + args.outdir_prefix + '/NA12878_CNN_results_' + args.caller_model + "_model_" + args.caller+"_"+str(args.iteration)
-    else:
-        output_dir_test = datapath_prefix + '/NA12878_CNN_results_' + args.caller_model + "_model_" + args.caller+"_"+str(args.iteration)
-
-    if args.stacked == "y":
-        output_dir_test = output_dir_test + "_stacked"
 
     if not os.path.isdir(output_dir_test):
         os.makedirs(output_dir_test)
-    print(datapath_test)
-    print(args.caller_model)
+
     run_cv(output_dir_test, datapath_test, model, args.iteration)
 
 
