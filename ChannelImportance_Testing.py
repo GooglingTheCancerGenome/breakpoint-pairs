@@ -205,7 +205,7 @@ def main():
 
     for channel in channels:
 
-        datapath_test = datapath_prefix + "Test_Training_Data/shuffled/"+args.negativeset+"/ N12878_DEL_TestData_"+channel+"_"+args.caller+".npz"
+        datapath_test = datapath_prefix + "Test_Training_Data/shuffled/"+args.negativeset+"/N12878_DEL_TestData_"+channel+"_"+args.caller+".npz"
         output_dir_test = datapath_prefix + "Channelimportance_"+args.negativeset + "/"+channel+"/" + 'NA12878_CNN_results_Consensus' + args.caller + "_model" + "_"+str(args.iteration)
         if not os.path.isdir(output_dir_test):
             os.makedirs(output_dir_test)
