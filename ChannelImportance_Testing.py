@@ -207,7 +207,7 @@ def main():
         datapath_test = datapath_prefix + "Test_Training_Data/shuffled/"+args.negativeset+"/N12878_DEL_TestData_"+channel+"_"+args.caller+".npz"
         output_dir_test = datapath_prefix + "/Channelimportance_Results_23052019/" + args.negativeset + "/" + 'NA12878_CNN_results_Consensus_' + args.caller + "_model" + "_"+str(args.iteration)+"_"+channel
         if not os.path.isdir(output_dir_test):
-            os.makedir(output_dir_test)
+            os.mkdir(output_dir_test)
         run_cv(output_dir_test, datapath_test, model, args.iteration)
 
 
