@@ -201,14 +201,13 @@ def main():
 
     HPC_MODE = True
 
-    datapath_prefix = '/hpc/cog_bioinf/ridder/users/smehrem/breakpoint-pairs/' if HPC_MODE else '/home/cog/smehrem/breakpoint-pairs/'
+    datapath_prefix = '/hpc/cog_bioinf/ridder/users/smehrem/breakpoint-pairs' if HPC_MODE else '/home/cog/smehrem/breakpoint-pairs/'
 
     for channel in channels:
-
         datapath_test = datapath_prefix + "Test_Training_Data/shuffled/"+args.negativeset+"/N12878_DEL_TestData_"+channel+"_"+args.caller+".npz"
-        output_dir_test = datapath_prefix + "Channelimportance_"+args.negativeset + "/"+channel+"/" + 'NA12878_CNN_results_Consensus' + args.caller + "_model" + "_"+str(args.iteration)
+        output_dir_test = datapath_prefix + "/Channelimportance_Results_23052019/" + args.negativeset + "/" + 'NA12878_CNN_results_Consensus_' + args.caller + "_model" + "_"+str(args.iteration)+"_"+channel
         if not os.path.isdir(output_dir_test):
-            os.makedirs(output_dir_test)
+            os.makedir(output_dir_test)
         run_cv(output_dir_test, datapath_test, model, args.iteration)
 
 
