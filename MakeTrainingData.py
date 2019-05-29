@@ -17,8 +17,14 @@ def stack_ontop(window_array):
     new_windows = np.asarray(new_windows)
     return new_windows
 
+channels = []
+with open("Channel_Labels.txt","r") as inlabels:
+    for line in inlabels:
+        line = line.strip()
+        channels += [line]
 
 windows_ontop = False
+shuffle = True
 
 chr_list = []
 with open("/home/cog/smehrem/MinorResearchInternship/BAM/BAM_chr_list", "r") as f:
@@ -31,7 +37,7 @@ chr_list = chr_list[3:-2]
 callers = ["delly", "gridss", "manta", "lumpy" ]
 
 
-for caller in callers:
+for caller in ["delly"]:
     labels = []
     bin_labels = []
     labels_neg = []
@@ -55,8 +61,8 @@ for caller in callers:
 
 
 
-        filepath_neg = "/home/cog/smehrem/breakpoint-pairs/genomewide_windowpairs_NoBPNoBP/"+chrom+"_negative_windowpairs_DEL.npy.gz"
-        filepath_id_neg = "/home/cog/smehrem/breakpoint-pairs/genomewide_windowpairs_NoBPNoBP/"+chrom+"_negative_windowpairs_DEL_winids.npy.gz"
+        filepath_neg = "/home/cog/smehrem/breakpoint-pairs/genomewide_windowpairs_TrueSV_TrueSV/"+chrom+"_negative_windowpairs_DEL.npy.gz"
+        filepath_id_neg = "/home/cog/smehrem/breakpoint-pairs/genomewide_windowpairs_TrueSV_TrueSV/"+chrom+"_negative_windowpairs_DEL_winids.npy.gz"
         if os.path.isfile(filepath_neg) and os.path.isfile(filepath):
             c = load_npygz(filepath_neg)
             e = c[0:perchr.shape[0], :, :]
@@ -88,8 +94,8 @@ for caller in callers:
             lab_test = ["DEL"] * g.shape[0]
             test_set_labels += lab_test
             testperchr = load_npygz(filepath)
-        filepath_neg = "/home/cog/smehrem/breakpoint-pairs/genomewide_windowpairs_NoBPNoBP/" + chrom + "_negative_windowpairs_DEL.npy.gz"
-        filepath_id_neg = "/home/cog/smehrem/breakpoint-pairs/genomewide_windowpairs_NoBPNoBP/" + chrom + "_negative_windowpairs_DEL_winids.npy.gz"
+        filepath_neg = "/home/cog/smehrem/breakpoint-pairs/genomewide_windowpairs_TrueSV_TrueSV/" + chrom + "_negative_windowpairs_DEL.npy.gz"
+        filepath_id_neg = "/home/cog/smehrem/breakpoint-pairs/genomewide_windowpairs_TrueSV_TrueSV/" + chrom + "_negative_windowpairs_DEL_winids.npy.gz"
         if os.path.isfile(filepath_neg) and os.path.isfile(filepath):
             j = load_npygz(filepath_neg)
             k = j[0:testperchr.shape[0], :, :]
@@ -110,9 +116,26 @@ for caller in callers:
     labels_all = labels + labels_neg
     labels_all = np.asarray(labels_all)
 
+
     test_set_windowpairs = np.vstack(test_set_windowpairs)
     test_set_windowpairs_neg = np.vstack(test_set_windowpairs_neg)
     test_set_windowpairs_all = np.vstack([test_set_windowpairs, test_set_windowpairs_neg])
+    shuffle_dict = {}
+    shuffle_dict_neg = {}
+
+    if shuffle:
+        for i in range(0, test_set_windowpairs_all.shape[2]):
+            test_set_windowpairs_all_shuffled = np.array(test_set_windowpairs_all, copy=True)
+            for j in range(0, test_set_windowpairs_all.shape[0]):
+                test_set_windowpairs_all_shuffled[j, :, i] = np.random.permutation(test_set_windowpairs_all_shuffled[j, :, i])
+                #print(test_set_windowpairs_all[j, :, i])
+                #print(test_set_windowpairs_all_shuffled[j, :, i])
+            shuffle_dict[i] = test_set_windowpairs_all_shuffled
+
+
+
+
+
     test_set_ids = np.concatenate(test_set_ids)
     test_set_ids_neg = np.concatenate(test_set_ids_neg)
     test_set_ids_all = np.concatenate([test_set_ids, test_set_ids_neg])
@@ -127,28 +150,18 @@ for caller in callers:
     y_train_binary = to_categorical(y_train)
     y_test_binary = to_categorical(y_test)
 
-    if windows_ontop:
-        windowpairs_all = stack_ontop(windowpairs_all)
-        test_set_windowpairs_all = stack_ontop(test_set_windowpairs_all)
-        np.savez("N12878_DEL_TrainingData_"+caller+"_stacked", X=windowpairs_all, y=labels_all, y_binary=y_train_binary, ids=ids_all)
-        np.savez("N12878_DEL_TestData_"+caller+"_stacked", X=test_set_windowpairs_all, y=test_set_labels_all, y_binary=y_test_binary, ids=test_set_ids_all)
-    else:
-        np.savez("N12878_DEL_TrainingData_"+caller, X=windowpairs_all, y=labels_all, y_binary=y_train_binary, ids=ids_all)
-        np.savez("N12878_DEL_TestData_"+caller, X=test_set_windowpairs_all, y=test_set_labels_all, y_binary=y_test_binary, ids=test_set_ids_all)
+    #if windows_ontop:
+        #windowpairs_all = stack_ontop(windowpairs_all)
+        #test_set_windowpairs_all = stack_ontop(test_set_windowpairs_all)
+       # np.savez("N12878_DEL_TrainingData_"+caller+"_stacked", X=windowpairs_all, y=labels_all, y_binary=y_train_binary, ids=ids_all)
+       # np.savez("N12878_DEL_TestData_"+caller+"_stacked", X=test_set_windowpairs_all, y=test_set_labels_all, y_binary=y_test_binary, ids=test_set_ids_all)
+    #else:
+        #np.savez("Test_Training_Data/CR_TrueSV/N12878_DEL_TrainingData_"+caller, X=windowpairs_all, y=labels_all, y_binary=y_train_binary, ids=ids_all)
+        #np.savez("Test_Training_Data/CR_TrueSV/N12878_DEL_TestData_"+caller, X=test_set_windowpairs_all, y=test_set_labels_all, y_binary=y_test_binary, ids=test_set_ids_all)
 
-    print(caller)
-    print("\t".join([str(windowpairs.shape), str(windowpair_ids.shape), str(len(labels))]))
-
-    print("\t".join([str(windowpairs_neg.shape), str(windowpair_ids_neg.shape), str(len(labels_neg))]))
-
-    print("\t".join([str(windowpairs_all.shape), str(ids_all.shape), str(labels_all.shape), str(y_train_binary.shape)]))
-
-    print("\t".join([str(test_set_windowpairs.shape), str(test_set_ids.shape), str(len(test_set_labels))]))
-
-    print("\t".join([str(test_set_windowpairs_neg.shape), str(test_set_ids_neg.shape), str(len(test_set_labels_neg))]))
-
-    print("\t".join([str(test_set_windowpairs_all.shape), str(test_set_ids_all.shape), str(test_set_labels_all.shape), str(y_test_binary.shape)]))
-    print('\n\n')
-
-
-
+    if shuffle:
+        for key in shuffle_dict:
+            shuffled_key = shuffle_dict[key]
+            np.savez("Test_Training_Data/shuffled/TrueSV_TrueSV/N12878_DEL_TestData_"+channels[key]+"_"+caller, X=shuffled_key, y=test_set_labels_all, y_binary=y_test_binary, ids=test_set_ids_all)
+            print(key)
+            print(caller)
