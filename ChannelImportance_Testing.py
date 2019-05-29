@@ -160,12 +160,15 @@ def data(datapath):
     return X, y, y_binary, win_ids
 
 
-def run_cv(output_dir_test, datapath_test, model, cv_iter):
+def run_cv(output_dir_test, datapath_test, model, cv_iter, channel):
 
     results = pd.DataFrame()
     # Load the data
 
     X_test, y_test, y_binary_test, win_ids_test = data(datapath_test)
+
+    for j in X_test.shape[0]:
+        X_test[j, :, channel] = np.random.permutation(X_test[j, :, channel][j, :, channel])
 
     results, probs = evaluate_model(model, X_test, y_test, y_binary_test, results, output_dir_test, cv_iter)
 
@@ -203,12 +206,13 @@ def main():
 
     datapath_prefix = '/hpc/cog_bioinf/ridder/users/smehrem/breakpoint-pairs' if HPC_MODE else '/home/cog/smehrem/breakpoint-pairs/'
 
+    datapath_test = datapath_prefix + "Test_Training_Data/" + args.negativeset + "/N12878_DEL_TestData_" + args.caller + ".npz"
+
     for channel in channels:
-        datapath_test = datapath_prefix + "Test_Training_Data/shuffled/"+args.negativeset+"/N12878_DEL_TestData_"+channel+"_"+args.caller+".npz"
         output_dir_test = datapath_prefix + "/Channelimportance_Results_23052019/" + args.negativeset + "/" + 'NA12878_CNN_results_Consensus_' + args.caller + "_model" + "_"+str(args.iteration)+"_"+channel
         if not os.path.isdir(output_dir_test):
             os.mkdir(output_dir_test)
-        run_cv(output_dir_test, datapath_test, model, args.iteration)
+        run_cv(output_dir_test, datapath_test, model, args.iteration, channels.index(channel))
 
 
 if __name__ == '__main__':
