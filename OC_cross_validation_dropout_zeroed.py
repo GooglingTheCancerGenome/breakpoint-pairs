@@ -402,7 +402,7 @@ def evaluate_model(model, X_test, y_test, ytest_binary, results, cv_iter, channe
     return results, probs
 
 
-def run_cv(output_dir_test, datapath_training, datapath_test, split, epochs, lr, drp1, drp2):
+def run_cv(output_dir_test, datapath_training, datapath_test, erasechannel, split, epochs, lr, drp1, drp2):
 
     labels = get_channel_labels()
 
@@ -413,15 +413,39 @@ def run_cv(output_dir_test, datapath_training, datapath_test, split, epochs, lr,
     for i, l in enumerate(labels):
         logging.info(str(i) + ':' + l)
 
-    # Load the data
-    X, y, y_binary, win_ids = data(datapath_training)
+    if erasechannel == "no":
+        # Load the data
+        X, y, y_binary, win_ids = data(datapath_training)
+        X_test, y_test, y_binary_test, win_ids_test = data(datapath_test)
+        results = results.append(cross_validation(X, y, y_binary, channels, X_test, y_test, y_binary_test, output_dir_test, win_ids_test, split, epochs, lr, drp1, drp2))
+        logging.info(results)
+        results.to_csv(output_dir_test + "/CV_results.csv", sep='\t')
 
-    X_test, y_test, y_binary_test, win_ids_test = data(datapath_test)
+    elif erasechannel == "tr":
+        for i in range(0, len(labels)):
+            output_dir_test = output_dir_test + "_" + labels[i]
+            X, y, y_binary, win_ids = data(datapath_training)
+            X_test, y_test, y_binary_test, win_ids_test = data(datapath_test)
+            for j in X.shape[0]:
+                X[j, :, i] = np.zeros(X.shape[1])
+            results = results.append(cross_validation(X, y, y_binary, channels, X_test, y_test, y_binary_test, output_dir_test, win_ids_test,
+                                 split, epochs, lr, drp1, drp2))
+            logging.info(results)
+            results.to_csv(output_dir_test + "/CV_results.csv", sep='\t')
 
-    results = results.append(cross_validation(X, y, y_binary, channels, X_test, y_test, y_binary_test, output_dir_test, win_ids_test, split, epochs, lr, drp1, drp2))
-
-    logging.info(results)
-    results.to_csv(output_dir_test+"/CV_results.csv", sep='\t')
+    elif erasechannel == "tetr":
+        for i in range(0, len(labels)):
+            output_dir_test = output_dir_test + "_" + labels[i]
+            X, y, y_binary, win_ids = data(datapath_training)
+            X_test, y_test, y_binary_test, win_ids_test = data(datapath_test)
+            for j in X.shape[0]:
+                X[j, :, i] = np.zeros(X.shape[1])
+            for l in range(0, X_test.shape[0]):
+                X_test[l, :, i] = np.zeros(X_test.shape[1])
+            results = results.append(cross_validation(X, y, y_binary, channels, X_test, y_test, y_binary_test, output_dir_test, win_ids_test,
+                                 split, epochs, lr, drp1, drp2))
+            logging.info(results)
+            results.to_csv(output_dir_test + "/CV_results.csv", sep='\t')
 
 
 def plot_results(output_dir_test):
@@ -456,20 +480,22 @@ def plot_results(output_dir_test):
 def main():
     parser = argparse.ArgumentParser(description='Training CNN on DELs')
     parser.add_argument('-spl', '--split', type=float,
-                        default=0.4,
+                        default=0.2,
                         help="Fraction of validation set")
-    parser.add_argument('-epo', '--epochs', type=int, default=10,
+    parser.add_argument('-epo', '--epochs', type=int, default=100,
                         help="Number of epochs to be trained on")
-    parser.add_argument('-lr', '--learningrate', type=int, default=2,
+    parser.add_argument('-lr', '--learningrate', type=int, default=4,
                         help="Exponent for learning rate parameter in McFly")
     parser.add_argument('-cal', '--caller', type=str, default='delly', help='Caller whose SVs are used for training.')
-    parser.add_argument('-drp1', '--dropout1', type=float, default=0.0, help='Dropout rate for first layer.')
-    parser.add_argument('-drp2', '--dropout2', type=float, default=0.0, help='Dropout rate for second layer.')
+    parser.add_argument('-drp1', '--dropout1', type=float, default=0.4, help='Dropout rate for first layer.')
+    parser.add_argument('-drp2', '--dropout2', type=float, default=0.1, help='Dropout rate for second layer.')
     parser.add_argument('-stack', '--stacked', type=str, default="n", help='Whether windows are side by side or on top of each other')
     parser.add_argument('-outpre', '--outdir_prefix', type=str, default="",
                         help='Output directory')
     parser.add_argument('-input', '--input_data', type=str, default="",
                         help='Path to input data (dir names only)')
+    parser.add_argument('-erase', '--erase_channel_in', type=str, default="no",
+                        help='Path to input data (dir names only). tr = Training, tetr = TestAndTrain, no = No erasing of channels')
 
 
 
@@ -517,7 +543,7 @@ def main():
         filename=os.path.join(output_dir_test, 'logfile.log'),
         level=logging.INFO)
 
-    run_cv(output_dir_test,  datapath_training, datapath_test, split=args.split, epochs=args.epochs,
+    run_cv(output_dir_test,  datapath_training, datapath_test, args.erase_channel_in, split=args.split, epochs=args.epochs,
            lr=args.learningrate, drp1=args.dropout1, drp2=args.dropout2)
 
     plot_results(output_dir_test)
