@@ -148,7 +148,7 @@ def cross_validation(X, y, y_binary, channels, X_test, y_test, y_binary_test, ou
 
         output_iter_dir = output_dir_test+'/Training_Iteration_' + str(i + 1)
         if not os.path.isdir(output_iter_dir):
-            os.mkdir(output_iter_dir)
+            os.makedirs(output_iter_dir)
 
         # Clear model, and create it
         model = None
