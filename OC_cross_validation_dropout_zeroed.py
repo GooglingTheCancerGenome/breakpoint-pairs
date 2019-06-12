@@ -426,7 +426,7 @@ def run_cv(output_dir_test, datapath_training, datapath_test, erasechannel, spli
             output_dir_test = output_dir_test + "_" + labels[i]
             X, y, y_binary, win_ids = data(datapath_training)
             X_test, y_test, y_binary_test, win_ids_test = data(datapath_test)
-            for j in X.shape[0]:
+            for j in range(0, X.shape[0]):
                 X[j, :, i] = np.zeros(X.shape[1])
             results = results.append(cross_validation(X, y, y_binary, channels, X_test, y_test, y_binary_test, output_dir_test, win_ids_test,
                                  split, epochs, lr, drp1, drp2))
@@ -438,7 +438,7 @@ def run_cv(output_dir_test, datapath_training, datapath_test, erasechannel, spli
             output_dir_test = output_dir_test + "_" + labels[i]
             X, y, y_binary, win_ids = data(datapath_training)
             X_test, y_test, y_binary_test, win_ids_test = data(datapath_test)
-            for j in X.shape[0]:
+            for j in range(0, X.shape[0]):
                 X[j, :, i] = np.zeros(X.shape[1])
             for l in range(0, X_test.shape[0]):
                 X_test[l, :, i] = np.zeros(X_test.shape[1])
