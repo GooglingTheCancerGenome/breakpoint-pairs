@@ -422,7 +422,6 @@ def run_cv(output_dir_test, datapath_training, datapath_test, erasechannel, chan
         results.to_csv(output_dir_test + "/CV_results.csv", sep='\t')
 
     elif erasechannel == "tr":
-        output_dir_test = output_dir_test + "_" + labels[channelnumber]
         X, y, y_binary, win_ids = data(datapath_training)
         X_test, y_test, y_binary_test, win_ids_test = data(datapath_test)
         for j in range(0, X.shape[0]):
@@ -433,8 +432,6 @@ def run_cv(output_dir_test, datapath_training, datapath_test, erasechannel, chan
         results.to_csv(output_dir_test + "/CV_results.csv", sep='\t')
 
     elif erasechannel == "tetr":
-
-        output_dir_test = output_dir_test + "_" + labels[channelnumber]
         X, y, y_binary, win_ids = data(datapath_training)
         X_test, y_test, y_binary_test, win_ids_test = data(datapath_test)
         for j in range(0, X.shape[0]):
@@ -496,7 +493,7 @@ def main():
     parser.add_argument('-erase', '--erase_channel_in', type=str, default="no",
                         help='Path to input data (dir names only). tr = Training, tetr = TestAndTrain, no = No erasing of channels')
     parser.add_argument('-ch', '--erase_channel_number', type=int, default=0,
-                        help='Path to input data (dir names only). tr = Training, tetr = TestAndTrain, no = No erasing of channels')
+                        help='Index of channel to be erased')
 
     args = parser.parse_args()
 
@@ -531,6 +528,10 @@ def main():
 
     if args.stacked == "y":
         output_dir_test = output_dir_test + "_stacked"
+
+    if args.erase_channel_in != "no":
+        labels = get_channel_labels()
+        output_dir_test = output_dir_test + "_" + labels[args.erase_channel_number]
 
     if not os.path.isdir(output_dir_test):
         os.makedirs(output_dir_test)
