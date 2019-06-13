@@ -11,7 +11,7 @@
 
 while read -a paras; do
 
-qsub ChannelImportance_Tetr_Run.sh ${paras[0]}  ${paras[1]} ${paras[2]} ${paras[3]}
+qsub ChannelImportance_Tetr_Run.sh ${paras[0]}  ${paras[1]} ${paras[2]} ${paras[3]} ${paras[4]}
 
 done < ChannelImportance_Tetr_Paras.txt 
 

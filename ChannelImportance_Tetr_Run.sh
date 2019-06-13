@@ -11,6 +11,6 @@
 conda activate breakpoint-pairs
 conda activate mcfly2
 
-./OC_cross_validation_dropout_zeroed.py -cal $1 -input $2 -erase $3 -outpre $4
+./OC_cross_validation_dropout_zeroed.py -cal $1 -input $2 -erase $3 -outpre $4 - ch $5
 
 
