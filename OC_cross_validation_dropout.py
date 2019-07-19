@@ -489,8 +489,8 @@ def main():
             datapath_training = datapath_traintest + "N12878_DEL_TrainingData_" + args.caller + "_stacked.npz"
             datapath_test = datapath_traintest + "N12878_DEL_TestData_" + args.caller + "_stacked.npz"
         else:
-            datapath_training = datapath_traintest + "N12878_DEL_TrainingData_" + args.caller + ".npz"
-            datapath_test = datapath_traintest + "N12878_DEL_TestData_" + args.caller + ".npz"
+            datapath_training = datapath_traintest + "N12878_DEL_NEWTrainingData_" + args.caller + ".npz"
+            datapath_test = datapath_traintest + "N12878_DEL_NEWTestData_" + args.caller + ".npz"
 
 
     else:
