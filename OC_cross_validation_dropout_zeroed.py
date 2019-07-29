@@ -513,8 +513,12 @@ def main():
             datapath_training = datapath_traintest + "N12878_DEL_TrainingData_" + args.caller + "_stacked.npz"
             datapath_test = datapath_traintest + "N12878_DEL_TestData_" + args.caller + "_stacked.npz"
         else:
-            datapath_training = datapath_traintest + "N12878_DEL_TrainingData_" + args.caller + ".npz"
-            datapath_test = datapath_traintest + "N12878_DEL_TestData_" + args.caller + ".npz"
+            if args.caller == "gridss":
+                datapath_training = datapath_traintest + "N12878_DEL_NEWTrainingData_" + args.caller + ".npz"
+                datapath_test = datapath_traintest + "N12878_DEL_NEWTestData_" + args.caller + ".npz"
+            else:
+                datapath_training = datapath_traintest + "N12878_DEL_TrainingData_" + args.caller + ".npz"
+                datapath_test = datapath_traintest + "N12878_DEL_TestData_" + args.caller + ".npz"
 
 
     else:
@@ -522,7 +526,7 @@ def main():
         datapath_test = datapath_traintest + "N12878_DEL_TestData_"+args.caller+".npz"
 
     if args.outdir_prefix != "":
-        output_dir_test = datapath_prefix+args.outdir_prefix+'/NA12878_CNN_results_'+str(int(args.split*100))+'_'+str(args.epochs)+'_' + \
+        output_dir_test = datapath_prefix+args.outdir_prefix+'_NEWGridss/NA12878_CNN_results_'+str(int(args.split*100))+'_'+str(args.epochs)+'_' + \
                       str(args.learningrate)+"_"+args.caller+"_"+str(int(args.dropout1*100))+"_"+str(int(args.dropout2*100))
     else:
         output_dir_test = datapath_prefix + '/NA12878_CNN_results_' + str(
