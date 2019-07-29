@@ -213,7 +213,7 @@ def main():
     for channel in channels:
         output_dir_test = datapath_prefix + "/Channelimportance_Zeroed_Results_NEWGridss/" + args.negativeset + "/" + 'NA12878_CNN_results_Consensus_' + args.caller + "_model" + "_"+str(args.iteration)+"_"+channel
         if not os.path.isdir(output_dir_test):
-            os.mkdir(output_dir_test)
+            os.makedirs(output_dir_test)
         run_cv(output_dir_test, datapath_test, model, args.iteration, channels.index(channel))
 
 
