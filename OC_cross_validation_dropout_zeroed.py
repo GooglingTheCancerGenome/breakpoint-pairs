@@ -425,8 +425,8 @@ def run_cv(output_dir_test, datapath_training, datapath_test, erasechannel, chan
         X, y, y_binary, win_ids = data(datapath_training)
         X_test, y_test, y_binary_test, win_ids_test = data(datapath_test)
         for j in range(0, X.shape[0]):
-            #X[j, :, channelnumber] = np.zeros(X.shape[1])
-            X[j, :, channelnumber] = np.random.permutation(X[j, :, channelnumber])
+            X[j, :, channelnumber] = np.zeros(X.shape[1])
+            #X[j, :, channelnumber] = np.random.permutation(X[j, :, channelnumber])
         results = results.append(cross_validation(X, y, y_binary, channels, X_test, y_test, y_binary_test, output_dir_test, win_ids_test,
                                  split, epochs, lr, drp1, drp2))
         logging.info(results)
@@ -438,8 +438,8 @@ def run_cv(output_dir_test, datapath_training, datapath_test, erasechannel, chan
         for j in range(0, X.shape[0]):
             X[j, :, channelnumber] = np.zeros(X.shape[1])
         for l in range(0, X_test.shape[0]):
-            #X_test[l, :, channelnumber] = np.zeros(X_test.shape[1])
-            X[j, :, channelnumber] = np.random.permutation(X[j, :, channelnumber])
+            X_test[l, :, channelnumber] = np.zeros(X_test.shape[1])
+            #X[j, :, channelnumber] = np.random.permutation(X[j, :, channelnumber])
         results = results.append(cross_validation(X, y, y_binary, channels, X_test, y_test, y_binary_test, output_dir_test, win_ids_test,
                                  split, epochs, lr, drp1, drp2))
         logging.info(results)
