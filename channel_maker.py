@@ -58,7 +58,7 @@ def create_dir(directory):
 
 
 def get_mappability_bigwig():
-    mappability_file = "/hpc/cog_bioinf/ridder/users/lsantuari/Datasets/Mappability/GRCh37.151mer.bw" if HPC_MODE \
+    mappability_file = "/hpc/cog_bioinf/ridder/users/smehrem/breakpoint-pairs/Mappability/GRCh37.151mer.bw" if HPC_MODE \
         else "/hpc/cog_bioinf/ridder/users/lsantuari/Datasets/Mappability/GRCh37.151mer.bw"
     bw = pyBigWig.open(mappability_file)
 
