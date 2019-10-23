@@ -5,7 +5,7 @@ The task of this project was to optimise DeepSV in regards to hyperparameters to
 For that I used existing calls of GRIDSS, Manta, Lumpy and Delly. I trained and tested the DeepSV CNN on these variants (per caller) and investigated aspects such as perfromance with different
 negative sets, channel importance and also compared it to the perfromance of the traditional SV callers using the gold-standard callset:
 
-trace.ncbi.nlm.nih.gov/giab/ftp/technical/svclassify_Manuscript/Supplementary_Information/Personalis_1000_Genomes_deduplicated_deletions.bed
+ftp://ftp-trace.ncbi.nlm.nih.gov/giab/ftp/technical/svclassify_Manuscript/Supplementary_Information/Personalis_1000_Genomes_deduplicated_deletions.bed
 
 
 The internship report can be found here:
