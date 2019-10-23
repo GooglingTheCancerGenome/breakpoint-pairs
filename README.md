@@ -23,7 +23,7 @@ The negative set genomic coordinates were generated using:
 MakeNegative_NoBP_NoBP.py
 MakeNegative_CR_CR.py
 MakeNegative_CR_TrueSV.py
-MakeNegative_TrueSV_TrueSV.py 
+MakeNegative_TrueSV_TrueSV.py
 
 We used window pairs (breakpoint-breakpoint) of channel windows as input. These were created using the scripts:
 
