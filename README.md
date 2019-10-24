@@ -8,10 +8,6 @@ negative sets, channel importance and also compared it to the perfromance of the
 ftp://ftp-trace.ncbi.nlm.nih.gov/giab/ftp/technical/svclassify_Manuscript/Supplementary_Information/Personalis_1000_Genomes_deduplicated_deletions.bed
 
 
-The internship report can be found here:
-
-https://docs.google.com/document/d/10gqmzAgrfbinHVsMw2v9aNGe5i7_1rCQ1tvS-QR3MYA/edit?usp=sharing
-
 
 # Gerenal workflow
 
