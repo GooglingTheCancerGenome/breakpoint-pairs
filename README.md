@@ -14,12 +14,16 @@ ftp://ftp-trace.ncbi.nlm.nih.gov/giab/ftp/technical/svclassify_Manuscript/Supple
 I started off by creating the test and training data per caller. For that I generated genomewide channel data of the NA12878 once.
 
 
-The negative set genomic coordinates were generated using:
+The negative set genomic coordinates were generated using
 
 MakeNegative_NoBP_NoBP.py
+
 MakeNegative_CR_CR.py
+
 MakeNegative_CR_TrueSV.py
+
 MakeNegative_TrueSV_TrueSV.py
+
 
 We used window pairs (breakpoint-breakpoint) of channel windows as input. These were created using the scripts:
 
@@ -30,13 +34,13 @@ and the VCF files of the respective callers and the genomic coordinates of the n
 
 
 
-Final training and test sets were created using:
+Final training and test sets were created using
 
 MakeTrainingData.py
 
 
 
-Next, to train the DeepSV CNN this script is used:
+Next, to train the DeepSV CNN this script is used
 
 OC_cross_validation_dropout.py
 
