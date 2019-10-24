@@ -28,6 +28,7 @@ MakeNegative_TrueSV_TrueSV.py
 We used window pairs (breakpoint-breakpoint) of channel windows as input. These were created using the scripts:
 
 MakeWindowPairs_genomewide.sh
+
 MakeWindowPairs_genomewide_negative.sh	
 
 and the VCF files of the respective callers and the genomic coordinates of the negative sets.
